@@ -66,15 +66,12 @@
 
 (define (match-pattern pattern against-val penv penv-out)
   (conde
-    [(numbero pattern)
-     (== pattern against-val)
-     (== penv penv-out)]
-    [(symbolo pattern)
-     (== pattern against-val)
-     (== penv penv-out)]
-    [(== '() pattern)
-     (== pattern against-val)
-     (== penv penv-out)]
+    [(== pattern against-val)
+     (== penv penv-out)
+     (conde
+       [(numbero pattern)]
+       [(symbolo pattern)]
+       [(== '() pattern)])]   
     [(fresh (var val)
       (== (list 'unquote var) pattern)
       (symbolo var)
@@ -93,15 +90,12 @@
 
 (define (not-match-pattern pattern against-val penv penv-out)
   (conde
-    [(numbero pattern)
-     (=/= pattern against-val)
-     (== penv penv-out)]
-    [(symbolo pattern)
-     (=/= pattern against-val)
-     (== penv penv-out)]
-    [(== '() pattern)
-     (=/= pattern against-val)
-     (== penv penv-out)]
+    [(=/= pattern against-val)
+     (== penv penv-out)
+     (conde
+       [(numbero pattern)]
+       [(symbolo pattern)]
+       [(== '() pattern)])]
     [(fresh (var val)
       (== (list 'unquote var) pattern)
       (=/= against-val val)
