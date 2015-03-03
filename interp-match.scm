@@ -35,6 +35,7 @@
     [(fresh (x body)
        (== `(lambda (,x) ,body) expr)
        (== `(closure ,x ,body ,env) val)
+       (symbolo x)
        (not-in-envo 'lambda env))]
     [(fresh (e1 e2 v1 v2)
        (== `(cons ,e1 ,e2) expr)

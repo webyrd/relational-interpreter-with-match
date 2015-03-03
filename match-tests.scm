@@ -237,8 +237,8 @@
                (cons (cons 'quote (cons _.0 '()))
                      ((lambda (_.1) '()) _.2)))))
      (=/= ((_.0 closure)) ((_.0 cons)) ((_.0 lambda))
-          ((_.0 quote)) ((_.1 quote)))
-     (num _.2) (sym _.0) (absento (closure _.1)))
+          ((_.0 quote)) ((_.1 closure)) ((_.1 quote)))
+     (num _.2) (sym _.0 _.1))
     (((lambda (_.0)
         (cons _.0
               (cons (cons 'quote (cons _.0 '()))
