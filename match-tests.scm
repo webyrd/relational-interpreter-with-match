@@ -250,3 +250,25 @@
      (=/= ((_.0 closure)) ((_.0 cons)) ((_.0 match))
           ((_.0 quote)))
      (num _.1) (sym _.0) (absento (closure _.2)))))
+
+
+(test "closure-generation"
+  (run 10 (q)
+    (eval-expo
+     q
+     '()
+     '(closure x x ())))
+  '((lambda (x) x)
+    ((match _.0 (_.0 (lambda (x) x)) . _.1) (num _.0))
+    (((lambda (_.0) _.0) (lambda (x) x)) (sym _.0))
+    ((match '_.0 (_.0 (lambda (x) x)) . _.1) (num _.0))
+    ((match '_.0 (_.0 (lambda (x) x)) . _.1)
+     (=/= ((_.0 closure))) (sym _.0))
+    ((match _.0 (_.1 _.2) (_.0 (lambda (x) x)) . _.3)
+     (=/= ((_.0 _.1))) (num _.0 _.1))
+    ((match (lambda (x) x) (,_.0 _.0) . _.1) (sym _.0))
+    (match '() (() (lambda (x) x)) . _.0)
+    ((match _.0 (_.1 _.2) (_.0 (lambda (x) x)) . _.3)
+     (num _.0) (sym _.1))
+    ((match '_.0 (_.1 _.2) (_.0 (lambda (x) x)) . _.3)
+     (=/= ((_.0 _.1))) (num _.0 _.1))))
