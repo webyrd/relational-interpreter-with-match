@@ -45,6 +45,7 @@
        (eval-expo e2 env v2))]
     [(fresh (rator rand x body env^ arg)
        (== `(,rator ,rand) expr)
+       (symbolo x)
        (eval-expo rator env `(closure ,x ,body ,env^))
        (eval-expo rand env arg)
        (eval-expo body `((,x . ,arg) . ,env^) val))]
