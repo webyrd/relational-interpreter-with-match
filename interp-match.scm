@@ -1,5 +1,15 @@
 (load "mk.scm")
 
+;; really should be a constraint built into miniKanren
+(define not-symbolo
+  (lambda (t)
+    (conde
+      [(== #f t)]
+      [(== #t t)]
+      [(numbero t)]
+      [(fresh (a d)
+         (== `(,a . ,d) t))])))
+
 (define (appendo l s out)
   (conde
     [(== '() l) (== s out)]
@@ -83,6 +93,16 @@
          (lookupo var penv val)]
         [(== `((,var . ,against-val) . ,penv) penv-out)
          (not-in-envo var penv)]))]
+    [(fresh (var val)
+      (== (list 'unquote `(? symbol? ,var)) pattern)
+      (symbolo var)
+      (symbolo against-val)
+      (conde
+        [(== against-val val)
+         (== penv penv-out)
+         (lookupo var penv val)]
+        [(== `((,var . ,against-val) . ,penv) penv-out)
+         (not-in-envo var penv)]))]    
     [(fresh (a d v1 v2 penv^)
        (== `(,a . ,d) pattern)
        (== `(,v1 . ,v2) against-val)
@@ -103,7 +123,16 @@
       (=/= against-val val)
       (== penv penv-out)
       (symbolo var)
-      (lookupo var penv val))]    
+      (lookupo var penv val))]
+    [(fresh (var val)
+       (== (list 'unquote `(? symbol? ,var)) pattern)
+       (== penv penv-out)
+       (symbolo var)       
+       (conde
+         [(not-symbolo against-val)]
+         [(=/= against-val val)          
+          (symbolo against-val)
+          (lookupo var penv val)]))]
     [(fresh (a d v1 v2 penv^)
        (== `(,a . ,d) pattern)
        (== `(,v1 . ,v2) against-val)

@@ -133,6 +133,41 @@
   '((first 5 6 5)))
 
 
+;; Racket-compatible 'symbol?' and 'number?' predicate syntax
+;;
+;; (lambda (,(? symbol? x)) ,body)
+(test "match-symbol-1"
+  (run* (q) (eval-expo '(match '(lambda (y) (y z)) [(lambda (,(? symbol? x)) ,body) (cons x body)]) '() q))
+  '((y y z)))
+
+(test "match-symbol-2"
+  (run 1 (pat out) (eval-expo `(match ,pat [(lambda (,',(? symbol? x)) ,',body) (cons x body)]) '() out))
+  '((('(lambda (_.0) _.1)
+      (_.0 . _.1))
+     (=/= ((_.0 closure)))
+   (sym _.0)
+   (absento (closure _.1)))))
+
+(test "match-symbol-3"
+  (run 3 (pat out) (eval-expo `(match ,pat [(lambda (,',(? symbol? x)) ,',body) (cons x body)]) '() out))
+  '((('(lambda (_.0) _.1)
+      (_.0 . _.1))
+     (=/= ((_.0 closure)))
+     (sym _.0)
+     (absento (closure _.1)))
+    (((cons 'lambda '((_.0) _.1))
+      (_.0 . _.1))
+     (=/= ((_.0 closure)))
+     (sym _.0)
+     (absento (closure _.1)))
+    ((((lambda (_.0) '(lambda (_.1) _.2)) _.3)
+      (_.1 . _.2))
+     (=/= ((_.0 quote)) ((_.1 closure)))
+     (num _.3)
+     (sym _.0 _.1)
+     (absento (closure _.2)))))
+
+
 
 
 (test "match-1a-backwards"
@@ -144,6 +179,7 @@
   (run* (q) (eval-expo `(match 5 [,q x]) '() 5))
   '(,x))
 
+(printf "This test takes a while...\n")
 (test "match-8-backwards"
   (run* (q)
     (eval-expo
