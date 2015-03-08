@@ -167,6 +167,12 @@
      (sym _.0 _.1)
      (absento (closure _.2)))))
 
+(test "match-symbol-4"
+  (run 3 (body) (eval-expo `(match '(lambda (y) (y z)) [(lambda (,',(? symbol? x)) ,',body) ,body]) '() '(y y z)))
+  '('(y y z)
+    (cons 'y body)
+    (cons 'y '(y z))))
+
 
 
 
