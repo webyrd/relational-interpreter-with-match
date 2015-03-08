@@ -345,7 +345,8 @@
 
 
 ;; another possible approach, assuming 'match' is extended to handle
-;; ,(quote ,datum).
+;; ,(quote ,datum).  This seems a bit weird, though, in how we would
+;; handle ,datum.
 ;;
 ;; letrec
 ;; multi-arg lambda/application
