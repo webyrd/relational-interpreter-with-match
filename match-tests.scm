@@ -315,3 +315,67 @@
      (num _.0) (sym _.1))
     ((match '_.0 (_.1 _.2) (_.0 (lambda (x) x)) . _.3)
      (=/= ((_.0 _.1))) (num _.0 _.1))))
+
+#!eof
+
+;; interpreter
+;;
+;; hack to avoid adding 'error': instead of representing empty env as
+;; (lambda (y) (error 'unbound-variable)), can force failure by applying a
+;; function with the wrong number of arguments
+;;
+;; letrec
+;; multi-arg lambda/application
+;; quote
+;; equal?
+;; if
+(letrec ((eval-expr
+          (lambda (expr env)
+            (match expr
+              [,(? symbol? x) (env x)]
+              [(lambda (,(? symbol? x)) ,body)
+               (lambda (a)
+                 (eval-expr body (lambda (y)
+                                   (if (equal? x y)
+                                       a
+                                       (env y)))))]
+              [(,rator ,rand)
+               ((eval-expr rator env) (eval-expr rand env))]))))
+  (eval-expr '((lambda (y) w) (lambda (z) z)) (lambda (y) ((lambda (z) z)))))
+
+
+;; another possible approach, assuming 'match' is extended to handle
+;; ,(quote ,datum).
+;;
+;; letrec
+;; multi-arg lambda/application
+;; quote
+(letrec ((eval-expr
+          (lambda (expr env)
+            (match expr
+              [,(? symbol? x) (env x)]
+              [(lambda (,(? symbol? x)) ,body)
+               (lambda (a)
+                 (eval-expr body (lambda (y)
+                                   (match y
+                                     [,(quote ,x) a]
+                                     [,else (env y)]))))]
+              [(,rator ,rand)
+               ((eval-expr rator env) (eval-expr rand env))]))))
+  (eval-expr '((lambda (y) w) (lambda (z) z)) (lambda (y) ((lambda (z) z)))))
+
+
+;; Racket version
+(letrec ((eval-expr
+          (lambda (expr env)
+            (match expr
+              [(? symbol? x) (env x)]
+              [`(lambda (,(? symbol? x)) ,body)
+               (lambda (a)
+                 (eval-expr body (lambda (y)
+                                   (if (equal? x y)
+                                       a
+                                       (env y)))))]
+              [`(,rator ,rand)
+               ((eval-expr rator env) (eval-expr rand env))]))))
+  (eval-expr '((lambda (y) w) (lambda (z) z)) (lambda (y) ((lambda (z) z)))))
