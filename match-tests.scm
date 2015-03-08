@@ -318,8 +318,31 @@
 
 #!eof
 
-;; interpreter
+;; higher-order interpreter
+
+;; ideal version
 ;;
+;; letrec
+;; multi-arg lambda/application
+;; quote
+;; equal?
+;; if
+;; error
+(letrec ((eval-expr
+          (lambda (expr env)
+            (match expr
+              [,(? symbol? x) (env x)]
+              [(lambda (,(? symbol? x)) ,body)
+               (lambda (a)
+                 (eval-expr body (lambda (y)
+                                   (if (equal? x y)
+                                       a
+                                       (env y)))))]
+              [(,rator ,rand)
+               ((eval-expr rator env) (eval-expr rand env))]))))
+  (eval-expr '((lambda (y) w) (lambda (z) z)) (lambda (y) (error 'unbound-variable y))))
+
+
 ;; hack to avoid adding 'error': instead of representing empty env as
 ;; (lambda (y) (error 'unbound-variable)), can force failure by applying a
 ;; function with the wrong number of arguments
