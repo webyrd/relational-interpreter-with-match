@@ -133,7 +133,7 @@
   '((first 5 6 5)))
 
 
-;; Racket-compatible 'symbol?' and 'number?' predicate syntax
+;; Racket-compatible 'symbol?' predicate syntax
 ;;
 ;; (lambda (,(? symbol? x)) ,body)
 (test "match-symbol-1"
