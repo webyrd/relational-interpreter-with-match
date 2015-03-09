@@ -1,5 +1,13 @@
 (load "mk.scm")
 
+;; match grammar
+;;
+;; (match ,expr ,clause ,clauses ...)
+;;
+;; clause ::= (,pattern ,expr)
+;;
+;; pattern ::= symbol | number | #t | #f | () | 
+
 ;; really should be a constraint built into miniKanren
 (define not-symbolo
   (lambda (t)
@@ -9,6 +17,12 @@
       [(numbero t)]
       [(fresh (a d)
          (== `(,a . ,d) t))])))
+
+(define booleano
+  (lambda (t)
+    (conde
+      [(== #f t)]
+      [(== #t t)])))
 
 (define (appendo l s out)
   (conde
@@ -83,6 +97,7 @@
      (conde
        [(numbero pattern)]
        [(symbolo pattern)]
+       [(booleano pattern)]
        [(== '() pattern)])]   
     [(fresh (var val)
       (== (list 'unquote var) pattern)
@@ -117,6 +132,7 @@
      (conde
        [(numbero pattern)]
        [(symbolo pattern)]
+       [(booleano pattern)]
        [(== '() pattern)])]
     [(fresh (var val)
       (== (list 'unquote var) pattern)

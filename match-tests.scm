@@ -133,6 +133,12 @@
   '((first 5 6 5)))
 
 
+(test "match-17"
+  (run* (q) (eval-expo '(match '#t [#f 6] [#t 8]) '() q))
+  '(8))
+
+
+
 ;; Racket-compatible 'symbol?' predicate syntax
 ;;
 ;; (lambda (,(? symbol? x)) ,body)
@@ -329,19 +335,30 @@
      '()
      '(closure x x ())))
   '((lambda (x) x)
-    ((match _.0 (_.0 (lambda (x) x)) . _.1) (num _.0))
-    (((lambda (_.0) _.0) (lambda (x) x)) (sym _.0))
-    ((match '_.0 (_.0 (lambda (x) x)) . _.1) (num _.0))
+    ((match _.0 (_.0 (lambda (x) x)) . _.1)
+     (num _.0))
+    (((lambda (_.0) _.0) (lambda (x) x))
+     (sym _.0))
     ((match '_.0 (_.0 (lambda (x) x)) . _.1)
-     (=/= ((_.0 closure))) (sym _.0))
+     (num _.0))
+    ((match '_.0 (_.0 (lambda (x) x)) . _.1)
+     (=/= ((_.0 closure)))
+     (sym _.0))
     ((match _.0 (_.1 _.2) (_.0 (lambda (x) x)) . _.3)
-     (=/= ((_.0 _.1))) (num _.0 _.1))
-    ((match (lambda (x) x) (,_.0 _.0) . _.1) (sym _.0))
-    (match '() (() (lambda (x) x)) . _.0)
+     (=/= ((_.0 _.1)))
+     (num _.0 _.1))
+    ((match (lambda (x) x) (,_.0 _.0) . _.1)
+     (sym _.0))
     ((match _.0 (_.1 _.2) (_.0 (lambda (x) x)) . _.3)
-     (num _.0) (sym _.1))
+     (num _.0)
+     (sym _.1))
     ((match '_.0 (_.1 _.2) (_.0 (lambda (x) x)) . _.3)
-     (=/= ((_.0 _.1))) (num _.0 _.1))))
+     (=/= ((_.0 _.1)))
+     (num _.0 _.1))
+    (((lambda (_.0) (match _.1 (_.1 (lambda (x) x)) . _.2)) _.3)
+     (=/= ((_.0 match)))
+     (num _.1 _.3)
+     (sym _.0))))
 
 #!eof
 
