@@ -206,6 +206,25 @@
      (=/= ((_.0 cons)) ((_.0 quote)) ((_.0 rand)) ((_.0 rator)))
      (sym _.0))))
 
+(printf "This test takes a while...\n")
+(test "match-8-backwards-b"
+  (run* (q)
+    (eval-expo
+     `(match '((lambda (y) (y z)) w)
+        [,q (cons rator (cons rand '()))])
+     '()
+     '((lambda (y) (y z)) w)))
+  '((,rator ,rand)
+    (,rator ,(? symbol? rand))
+    ((,rator ,rand unquote _.0)
+     (=/= ((_.0 cons)) ((_.0 quote))
+          ((_.0 rand)) ((_.0 rator)))
+     (sym _.0))
+    ((,rator ,(? symbol? rand) unquote _.0)
+     (=/= ((_.0 cons)) ((_.0 quote))
+          ((_.0 rand)) ((_.0 rator)))
+     (sym _.0))))
+
 (test "match-8-backwards-verify-a"
   (run* (q)
     (eval-expo
