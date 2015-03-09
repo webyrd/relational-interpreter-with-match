@@ -59,11 +59,14 @@
        (eval-expo rator env `(closure ,x ,body ,env^))
        (eval-expo rand env arg)
        (eval-expo body `((,x . ,arg) . ,env^) val))]
+
     [(fresh (against-expr against-val clause clauses)
        (== `(match ,against-expr ,clause . ,clauses) expr)
        (not-in-envo 'match env)
        (eval-expo against-expr env against-val)
-       (match-clauses against-val `(,clause . ,clauses) env val))]))
+       (match-clauses against-val `(,clause . ,clauses) env val))]
+
+    ))
 
 (define (match-clauses against-val clauses env val)
   (fresh (pattern result-expr d penv)

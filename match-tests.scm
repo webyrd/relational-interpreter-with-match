@@ -138,7 +138,11 @@
 ;; (lambda (,(? symbol? x)) ,body)
 ;;
 (test "match-symbol-1"
-  (run* (q) (eval-expo '(match '(lambda (y) (y z)) [(lambda (,(? symbol? x)) ,body) (cons x body)]) '() q))
+  (run* (q) (eval-expo
+             '(match '(lambda (y) (y z))
+                [(lambda (,(? symbol? x)) ,body) (cons x body)])
+             '()
+             q))
   '((y y z)))
 
 (test "match-symbol-2"
@@ -178,7 +182,10 @@
 
 
 (test "match-1a-backwards"
-  (run* (q) (eval-expo `(match 5 [,q 6]) '() '6))
+  (run* (q) (eval-expo `(match 5
+                          [,q 6])
+                       '()
+                       '6))
   '(5
     (,_.0 (sym _.0))))
 
@@ -190,11 +197,12 @@
 (test "match-8-backwards"
   (run* (q)
     (eval-expo
-      `(match '((lambda (y) (y z)) 5) [,q (cons rator (cons rand '()))])
+      `(match '((lambda (y) (y z)) 5)
+         [,q (cons rator (cons rand '()))])
       '()
       '((lambda (y) (y z)) 5)))
   '((,rator ,rand)
-    ((,rator ,rand unquote _.0)
+    ((,rator ,rand . (unquote _.0))
      (=/= ((_.0 cons)) ((_.0 quote)) ((_.0 rand)) ((_.0 rator)))
      (sym _.0))))
 
