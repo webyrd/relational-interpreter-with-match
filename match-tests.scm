@@ -161,20 +161,17 @@
 
 (test "match-symbol-3"
   (run 3 (pat out) (eval-expo `(match ,pat [(lambda (,',(? symbol? x)) ,',body) (cons x body)]) '() out))
-  '((('(lambda (_.0) _.1)
-      (_.0 . _.1))
+  '((('(lambda (_.0) _.1) (_.0 . _.1))
      (=/= ((_.0 closure)))
      (sym _.0)
      (absento (closure _.1)))
-    (((cons 'lambda '((_.0) _.1))
-      (_.0 . _.1))
-     (=/= ((_.0 closure)))
-     (sym _.0)
-     (absento (closure _.1)))
-    ((((lambda (_.0) '(lambda (_.1) _.2)) _.3)
-      (_.1 . _.2))
+    ((((lambda (_.0) '(lambda (_.1) _.2)) _.3) (_.1 . _.2))
      (=/= ((_.0 quote)) ((_.1 closure)))
      (num _.3)
+     (sym _.0 _.1)
+     (absento (closure _.2)))
+    ((((lambda (_.0) '(lambda (_.1) _.2)) #f) (_.1 . _.2))
+     (=/= ((_.0 quote)) ((_.1 closure)))
      (sym _.0 _.1)
      (absento (closure _.2)))))
 
@@ -296,8 +293,10 @@
 
 
 (test "quine-1"
-  (run 4 (q) (eval-expo q '() q))
+  (run 6 (q) (eval-expo q '() q))
   '((_.0 (num _.0))
+    #f
+    #t
     (((lambda (_.0)
         (cons _.0 (cons (cons 'quote (cons _.0 '())) '())))
       '(lambda (_.0)
@@ -327,7 +326,6 @@
           ((_.0 quote)))
      (num _.1) (sym _.0) (absento (closure _.2)))))
 
-
 (test "closure-generation"
   (run 10 (q)
     (eval-expo
@@ -337,28 +335,22 @@
   '((lambda (x) x)
     ((match _.0 (_.0 (lambda (x) x)) . _.1)
      (num _.0))
+    (match #f (#f (lambda (x) x)) . _.0)
+    ((match _.0 (_.1 _.2) (_.0 (lambda (x) x)) . _.3)
+     (=/= ((_.0 _.1))) (num _.0 _.1))
+    (match #t (#t (lambda (x) x)) . _.0)
     (((lambda (_.0) _.0) (lambda (x) x))
      (sym _.0))
     ((match '_.0 (_.0 (lambda (x) x)) . _.1)
      (num _.0))
-    ((match '_.0 (_.0 (lambda (x) x)) . _.1)
-     (=/= ((_.0 closure)))
-     (sym _.0))
     ((match _.0 (_.1 _.2) (_.0 (lambda (x) x)) . _.3)
-     (=/= ((_.0 _.1)))
-     (num _.0 _.1))
-    ((match (lambda (x) x) (,_.0 _.0) . _.1)
-     (sym _.0))
-    ((match _.0 (_.1 _.2) (_.0 (lambda (x) x)) . _.3)
-     (num _.0)
-     (sym _.1))
-    ((match '_.0 (_.1 _.2) (_.0 (lambda (x) x)) . _.3)
-     (=/= ((_.0 _.1)))
-     (num _.0 _.1))
+     (num _.0) (sym _.1))
     (((lambda (_.0) (match _.1 (_.1 (lambda (x) x)) . _.2)) _.3)
      (=/= ((_.0 match)))
      (num _.1 _.3)
-     (sym _.0))))
+     (sym _.0))
+    ((match #f (_.0 _.1) (#f (lambda (x) x)) . _.2)
+     (num _.0))))
 
 #!eof
 

@@ -18,6 +18,14 @@
       [(fresh (a d)
          (== `(,a . ,d) t))])))
 
+(define literalo
+  (lambda (t)
+    (conde
+      [(numbero t)]
+      [(symbolo t)]
+      [(booleano t)]
+      [(== '() t)])))
+
 (define booleano
   (lambda (t)
     (conde
@@ -50,6 +58,8 @@
 (define (eval-expo expr env val)
   (conde
     [(numbero expr)
+     (== expr val)]
+    [(booleano expr)
      (== expr val)]
     [(== `(quote ,val) expr)
      (absento 'closure val)
@@ -94,11 +104,7 @@
   (conde
     [(== pattern against-val)
      (== penv penv-out)
-     (conde
-       [(numbero pattern)]
-       [(symbolo pattern)]
-       [(booleano pattern)]
-       [(== '() pattern)])]   
+     (literalo pattern)]   
     [(fresh (var val)
       (== (list 'unquote var) pattern)
       (symbolo var)
@@ -129,11 +135,7 @@
   (conde
     [(=/= pattern against-val)
      (== penv penv-out)
-     (conde
-       [(numbero pattern)]
-       [(symbolo pattern)]
-       [(booleano pattern)]
-       [(== '() pattern)])]
+     (literalo pattern)]
     [(fresh (var val)
       (== (list 'unquote var) pattern)
       (=/= against-val val)
