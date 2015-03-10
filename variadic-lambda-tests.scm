@@ -172,6 +172,221 @@
      (=/= ((_.0 closure)))
      (sym _.0))))
 
+(test "Scheme-interpreter-2c"
+  (run* (q)
+    (eval-expo
+      `(letrec ((eval-expr
+                 (lambda (expr env)
+                   (match expr
+                     [(? number? n) n]
+                     [(? symbol? x) (env x)]
+                     [`(lambda (,(? symbol? x)) ,body)
+                      (lambda (a)
+                        (eval-expr body (lambda (y)
+                                          (if (equal? x y)
+                                              a
+                                              (env y)))))]
+                     [`(,rator ,rand)
+                      ((eval-expr rator env) (eval-expr rand env))]))))
+         (eval-expr '((lambda (w) 5) 6) (lambda (y) ((lambda (z) z)))))
+      '()
+      '5))
+  '(_.0))
+
+(test "Scheme-interpreter-2d"
+  (run 2 (q)
+    (eval-expo
+      `(letrec ((eval-expr
+                 (lambda (expr env)
+                   (match expr
+                     [(? number? n) ,q]
+                     [(? symbol? x) (env x)]
+                     [`(lambda (,(? symbol? x)) ,body)
+                      (lambda (a)
+                        (eval-expr body (lambda (y)
+                                          (if (equal? x y)
+                                              a
+                                              (env y)))))]
+                     [`(,rator ,rand)
+                      ((eval-expr rator env) (eval-expr rand env))]))))
+         (eval-expr '((lambda (w) 5) 6) (lambda (y) ((lambda (z) z)))))
+      '()
+      '5))
+  '(5
+    n))
+
+(test "Scheme-interpreter-2e"
+  (run 1 (q)
+    (absento 5 q)
+    (absento 6 q)
+    (absento 'w q)
+    (absento 'lambda q)
+    (eval-expo
+      `(letrec ((eval-expr
+                 (lambda (expr env)
+                   (match expr
+                     [,q n]
+                     [(? symbol? x) (env x)]
+                     [`(lambda (,(? symbol? x)) ,body)
+                      (lambda (a)
+                        (eval-expr body (lambda (y)
+                                          (if (equal? x y)
+                                              a
+                                              (env y)))))]
+                     [`(,rator ,rand)
+                      ((eval-expr rator env) (eval-expr rand env))]))))
+         (eval-expr '((lambda (w) 5) 6) (lambda (y) ((lambda (z) z)))))
+      '()
+      '5))
+  '((`((,_.0 ,_.1 ,n) unquote _.2)
+     (=/= ((_.0 _.1)) ((_.0 _.2)) ((_.0 lambda)) ((_.0 n))
+          ((_.0 w)) ((_.1 _.2)) ((_.1 lambda)) ((_.1 n))
+          ((_.1 w)) ((_.2 lambda)) ((_.2 n)) ((_.2 w)))
+     (sym _.0 _.1 _.2))))
+
+(test "Scheme-interpreter-2f"
+  (run* (q)
+    (eval-expo
+      `(letrec ((eval-expr
+                 (lambda (expr env)
+                   (match expr
+                     [(? symbol? x) (env x)]
+                     [`(lambda (,(? symbol? x)) ,body)
+                      (lambda (a)
+                        (eval-expr body (lambda (y)
+                                          (if (equal? x y)
+                                              a
+                                              (env y)))))]
+                     [`(,rator ,rand)
+                      ((eval-expr rator env) (eval-expr rand env))]
+                     [(? number? n) n]))))
+         (eval-expr '((lambda (w) 5) 6) (lambda (y) ((lambda (z) z)))))
+      '()
+      '5))
+  '(_.0))
+
+(test "Scheme-interpreter-2g"
+  (run* (q)
+    (eval-expo
+      `(letrec ((eval-expr
+                 (lambda (expr env)
+                   (match expr
+                     [(? symbol? x) (env x)]
+                     [`(lambda (,(? symbol? x)) ,body)
+                      (lambda (a)
+                        (eval-expr body (lambda (y)
+                                          (if (equal? x y)
+                                              a
+                                              (env y)))))]
+                     [`(,rator ,rand)
+                      ((eval-expr rator env) (eval-expr rand env))]
+                     [,q n]))))
+         (eval-expr '((lambda (w) 5) 6) (lambda (y) ((lambda (z) z)))))
+      '()
+      '5))
+  '(n
+    (? number? n)
+    `,n
+    `,(? number? n)))
+
+(test "Scheme-interpreter-2h"
+  (run* (q)
+    (eval-expo
+      `(letrec ((eval-expr
+                 (lambda (expr env)
+                   (match expr
+                     [(? number? n) n]
+                     [(? symbol? x) (env x)]
+                     [`(lambda (,(? symbol? x)) ,body)
+                      (lambda (a)
+                        (eval-expr body (lambda (y)
+                                          (if (equal? x y)
+                                              a
+                                              (env y)))))]
+                     [`(,rator ,rand)
+                      ((eval-expr rator env) (eval-expr rand env))]))))
+         (cons
+           (eval-expr '((lambda (w) 5) 6) (lambda (y) ((lambda (z) z))))
+           (eval-expr '((lambda (v) v) 7) (lambda (y) ((lambda (z) z))))))
+      '()
+      '(5 . 7)))
+  '(_.0))
+
+(test "Scheme-interpreter-2h"
+  (run 1 (q)
+    (eval-expo
+      `(letrec ((eval-expr
+                 (lambda (expr env)
+                   (match expr
+                     [,q n]
+                     [(? symbol? x) (env x)]
+                     [`(lambda (,(? symbol? x)) ,body)
+                      (lambda (a)
+                        (eval-expr body (lambda (y)
+                                          (if (equal? x y)
+                                              a
+                                              (env y)))))]
+                     [`(,rator ,rand)
+                      ((eval-expr rator env) (eval-expr rand env))]))))
+         (cons
+           (eval-expr '((lambda (w) 5) 6) (lambda (y) ((lambda (z) z))))
+           (eval-expr '((lambda (v) v) 7) (lambda (y) ((lambda (z) z))))))
+      '()
+      '(5 . 7)))
+  '((? number? n)))
+
+(test "Scheme-interpreter-2i"
+  (run 2 (q)
+    (eval-expo
+      `(letrec ((eval-expr
+                 (lambda (expr env)
+                   (match expr
+                     [,q n]
+                     [(? symbol? x) (env x)]
+                     [`(lambda (,(? symbol? x)) ,body)
+                      (lambda (a)
+                        (eval-expr body (lambda (y)
+                                          (if (equal? x y)
+                                              a
+                                              (env y)))))]
+                     [`(,rator ,rand)
+                      ((eval-expr rator env) (eval-expr rand env))]))))
+         (cons
+           (eval-expr '((lambda (w) 5) 6) (lambda (y) ((lambda (z) z))))
+           (eval-expr '((lambda (v) v) 7) (lambda (y) ((lambda (z) z))))))
+      '()
+      '(5 . 7)))
+  '((? number? n)
+    `,(? number? n)))
+
+;;; Does run 3 ever come back???
+(test "Scheme-interpreter-2j"
+  (run 2 (q)
+    (eval-expo
+      `(letrec ((eval-expr
+                 (lambda (expr env)
+                   (match expr
+                     [,q n]
+                     [(? symbol? x) (env x)]
+                     [`(lambda (,(? symbol? x)) ,body)
+                      (lambda (a)
+                        (eval-expr body (lambda (y)
+                                          (if (equal? x y)
+                                              a
+                                              (env y)))))]
+                     [`(,rator ,rand)
+                      ((eval-expr rator env) (eval-expr rand env))]))))
+         (cons
+           (eval-expr '((lambda (w) 5) 6) (lambda (y) ((lambda (z) z))))
+           (eval-expr '((lambda (v) v) 7) (lambda (y) ((lambda (z) z))))))
+      '()
+      '(5 . 7)))
+  '((? number? n)
+    `,(? number? n)))
+
+
+
+
 
 
 (test "Scheme-interpreter-3"
