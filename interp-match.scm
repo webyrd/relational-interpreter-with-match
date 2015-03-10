@@ -126,7 +126,7 @@
       [(fresh (env^)
          (top-pattern-matches top-pattern against-val '() penv)
          (appendo penv env env^)
-         (eval-expo result-expr penv val))]
+         (eval-expo result-expr env^ val))]
       [(top-pattern-but-doesnt-match top-pattern against-val '() penv)
        (match-clauses against-val d env val)])))
 

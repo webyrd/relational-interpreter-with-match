@@ -2,6 +2,19 @@
 (load "mk/test-check.scm")
 
 
+(test "env-match-1"
+  (run* (q)
+    (eval-expo
+     '((lambda (w)
+         (match '(lambda (y) (y z))
+           [`(lambda (,x) ,body) (cons w body)]))
+       6)
+      '()
+      q))
+  '((6 y z)))
+
+
+
 (test "match-0"
   (run* (q) (eval-expo '(match 5) '() q))
   '())
@@ -301,14 +314,14 @@
     (((lambda (_.0)
         (cons _.0
               (cons (cons 'quote (cons _.0 '()))
-                    (match _.1 (_.1 '()) . _.2))))
+                    ((lambda (_.1) '()) #f))))
       '(lambda (_.0)
          (cons _.0
                (cons (cons 'quote (cons _.0 '()))
-                     (match _.1 (_.1 '()) . _.2)))))
-     (=/= ((_.0 closure)) ((_.0 cons)) ((_.0 match))
-          ((_.0 quote)))
-     (num _.1) (sym _.0) (absento (closure _.2)))))
+                     ((lambda (_.1) '()) #f)))))
+     (=/= ((_.0 closure)) ((_.0 cons)) ((_.0 lambda))
+          ((_.0 quote)) ((_.1 closure)) ((_.1 quote)))
+     (sym _.0 _.1))))
 
 (test "closure-generation"
   (run 10 (q)
