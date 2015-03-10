@@ -6,6 +6,7 @@
 ;; letrec is based on Dan Friedman's code, using the "half-closure"
 ;; approach from Reynold's definitional interpreters
 
+(define empty-env '())
 
 (define lookupo
   (lambda (x env t)
@@ -35,7 +36,7 @@
 (define not-in-envo
   (lambda (x env)
     (conde
-      ((== '() env))
+      ((== empty-env env))
       ((fresh (y v rest)
          (== `(ext-env ,y ,v ,rest) env)
          (=/= y x)
@@ -90,7 +91,7 @@
 
 (define evalo
   (lambda (exp val)
-    (eval-expo exp '() val)))
+    (eval-expo exp empty-env val)))
 
 (define eval-expo
   (lambda (exp env val)
@@ -99,6 +100,8 @@
       ((== `(quote ,val) exp)
        (absento 'closure val)
        (not-in-envo 'quote env))
+
+      ((numbero exp) (== exp val))
 
       ((symbolo exp) (lookupo exp env val))
       
@@ -116,32 +119,16 @@
          (list-of-symbolso x*)
          (not-in-envo 'lambda env)))
       
-      ;; apply for variadic procedure
-      ((fresh (e e* x body env^ a* res)
-         (== `(apply ,e ,e*) exp)
-         (not-in-envo 'apply env)
-         (symbolo x)
-         (== `(ext-env ,x ,a* ,env^) res)
-         (eval-expo e env `(closure (lambda ,x ,body) ,env^))
-         (eval-expo e* env a*)
-         (listo a*)
-         (eval-expo body res val)))
-
-      ;; apply for mult-argument procedure
-      ((fresh (e e* x x* body env^ a* res)
-         (== `(apply ,e ,e*) exp)
-         (not-in-envo 'apply env)
-         (symbolo x)
-         (ext-env*o `(,x . ,x*) a* env^ res)
-         (eval-expo e env `(closure (lambda (,x . ,x*) ,body) ,env^))
-         (eval-expo e* env a*)
-         (listo a*)
-         (eval-expo body res val)))
-      
       ((fresh (a*)
          (== `(list . ,a*) exp)
          (not-in-envo 'list env)
          (eval-listo a* env val)))
+
+      ((fresh (against-expr against-val clause clauses)
+         (== `(match ,against-expr ,clause . ,clauses) exp)
+         (not-in-envo 'match env)
+         (eval-expo against-expr env against-val)
+         (match-clauses against-val `(,clause . ,clauses) env val)))
       
       ((fresh (rator x rands body env^ a* res)
          (== `(,rator . ,rands) exp)
@@ -183,7 +170,30 @@
       
       ;;; don't comment this out accidentally!!!
       ((prim-expo exp env val))
-            
+
+      
+      ;; apply for variadic procedure
+      ((fresh (e e* x body env^ a* res)
+         (== `(apply ,e ,e*) exp)
+         (not-in-envo 'apply env)
+         (symbolo x)
+         (== `(ext-env ,x ,a* ,env^) res)
+         (eval-expo e env `(closure (lambda ,x ,body) ,env^))
+         (eval-expo e* env a*)
+         (listo a*)
+         (eval-expo body res val)))
+
+      ;; apply for mult-argument procedure
+      ((fresh (e e* x x* body env^ a* res)
+         (== `(apply ,e ,e*) exp)
+         (not-in-envo 'apply env)
+         (symbolo x)
+         (ext-env*o `(,x . ,x*) a* env^ res)
+         (eval-expo e env `(closure (lambda (,x . ,x*) ,body) ,env^))
+         (eval-expo e* env a*)
+         (listo a*)
+         (eval-expo body res val)))
+      
       )))
 
 (define ext-env*o
@@ -296,3 +306,174 @@
       (conde
         ((=/= #f t) (eval-expo e2 env val))
         ((== #f t) (eval-expo e3 env val))))))
+
+
+
+;; match-related code
+
+;; really should be a constraint built into miniKanren
+(define not-symbolo
+  (lambda (t)
+    (conde
+      [(== #f t)]
+      [(== #t t)]
+      [(numbero t)]
+      [(fresh (a d)
+         (== `(,a . ,d) t))])))
+
+(define not-numbero
+  (lambda (t)
+    (conde
+      [(== #f t)]
+      [(== #t t)]
+      [(symbolo t)]
+      [(fresh (a d)
+         (== `(,a . ,d) t))])))
+
+(define self-eval-literalo
+  (lambda (t)
+    (conde
+      [(numbero t)]
+      [(booleano t)])))
+
+(define literalo
+  (lambda (t)
+    (conde
+      [(numbero t)]
+      [(symbolo t)]
+      [(booleano t)]
+      [(== '() t)])))
+
+(define booleano
+  (lambda (t)
+    (conde
+      [(== #f t)]
+      [(== #t t)])))
+
+
+(define (regular-env-appendo env1 env2 env-out)
+  (conde
+    [(== empty-env env1) (== env2 env-out)]
+    [(fresh (y v rest res)
+       (== `(ext-env ,y ,v ,rest) env1)
+       (== `(ext-env ,y ,v ,res) env-out)
+       (regular-env-appendo rest env2 res))]))
+
+
+(define (match-clauses against-val clauses env val)
+  (fresh (top-pattern result-expr d penv)
+    (== `((,top-pattern ,result-expr) . ,d) clauses)
+    (conde
+      [(fresh (env^)
+         (top-pattern-matches top-pattern against-val '() penv)
+         (regular-env-appendo penv env env^)
+         (eval-expo result-expr penv val))]
+      [(top-pattern-but-doesnt-match top-pattern against-val '() penv)
+       (match-clauses against-val d env val)])))
+
+
+
+(define (top-pattern-matches top-pattern against-val penv penv-out)
+  (conde
+    [(self-eval-literalo top-pattern) (== top-pattern against-val) (== penv penv-out)]
+    [(pattern-matches top-pattern against-val penv penv-out)]
+    [(fresh (quasi-pattern)
+      (== (list 'quasiquote quasi-pattern) top-pattern)
+      (quasi-pattern-matches quasi-pattern against-val penv penv-out))]))
+
+(define (top-pattern-but-doesnt-match top-pattern against-val penv penv-out)
+  (conde
+    [(self-eval-literalo top-pattern) (=/= top-pattern against-val) (== penv penv-out)]
+    [(pattern-but-doesnt-match top-pattern against-val penv penv-out)]
+    [(fresh (quasi-pattern)
+      (== (list 'quasiquote quasi-pattern) top-pattern)
+      (quasi-pattern-but-doesnt-match quasi-pattern against-val penv penv-out))]))
+
+
+(define (var-pattern-matches var against-val penv penv-out)
+  (fresh (val)
+    (symbolo var)
+    (conde
+      [(== against-val val)
+       (== penv penv-out)
+       (lookupo var penv val)]
+      [(== `(ext-env ,var ,against-val ,penv) penv-out)
+       (not-in-envo var penv)])))
+
+(define (var-pattern-but-doesnt-match var against-val penv penv-out)
+  (fresh (val)
+    (symbolo var)
+    (=/= against-val val)
+    (== penv penv-out)
+    (lookupo var penv val)))
+
+
+
+(define (pattern-matches pattern against-val penv penv-out)
+  (conde
+    [(var-pattern-matches pattern against-val penv penv-out)]
+    [(fresh (var pred val)
+      (== `(? ,pred ,var) pattern)
+      (conde
+        [(== 'symbol? pred)
+         (symbolo against-val)]
+        [(== 'number? pred)
+         (numbero against-val)])
+      (var-pattern-matches var against-val penv penv-out))]))
+
+(define (pattern-but-doesnt-match pattern against-val penv penv-out)
+  (conde
+    [(var-pattern-but-doesnt-match pattern against-val penv penv-out)]
+    [(fresh (var pred val)
+       (== `(? ,pred ,var) pattern)       
+       (== penv penv-out)
+       (symbolo var)       
+       (conde
+         [(== 'symbol? pred)
+          (conde
+            [(not-symbolo against-val)]
+            [(symbolo against-val)
+             (var-pattern-but-doesnt-match var against-val penv penv-out)])]
+         [(== 'number? pred)
+          (conde
+            [(not-numbero against-val)]
+            [(numbero against-val)
+             (var-pattern-but-doesnt-match var against-val penv penv-out)])]))]))
+
+
+
+(define (quasi-pattern-matches quasi-pattern against-val penv penv-out)
+  (conde
+    [(== quasi-pattern against-val)
+     (== penv penv-out)
+     (literalo quasi-pattern)]   
+    [(fresh (pattern)
+      (== (list 'unquote pattern) quasi-pattern)
+      (pattern-matches pattern against-val penv penv-out))]
+    [(fresh (a d v1 v2 penv^)
+       (== `(,a . ,d) quasi-pattern)
+       (== `(,v1 . ,v2) against-val)
+       (=/= 'unquote a)
+       (quasi-pattern-matches a v1 penv penv^)
+       (quasi-pattern-matches d v2 penv^ penv-out))]))
+
+(define (quasi-pattern-but-doesnt-match quasi-pattern against-val penv penv-out)
+  (conde
+    [(=/= quasi-pattern against-val)
+     (== penv penv-out)
+     (literalo quasi-pattern)]
+    [(fresh (pattern)
+       (== (list 'unquote pattern) quasi-pattern)
+       (pattern-but-doesnt-match pattern against-val penv penv-out))]
+    [(fresh (a d)
+       (== `(,a . ,d) quasi-pattern)
+       (=/= 'unquote a)
+       (conde
+         [(== penv penv-out)
+          (literalo against-val)]
+         [(fresh (v1 v2 penv^)
+            (== `(,v1 . ,v2) against-val)
+            (conde
+              [(quasi-pattern-but-doesnt-match a v1 penv penv^)]
+              [(quasi-pattern-matches a v1 penv penv^)
+               (quasi-pattern-but-doesnt-match d v2 penv^ penv-out)]))]))]))

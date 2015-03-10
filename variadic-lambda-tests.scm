@@ -18,6 +18,388 @@
 ;; Helper Scheme predicate for testing
 (define member? (lambda (x ls) (not (not (member x ls)))))
 
+
+;; match tests
+(test "match-0"
+  (run* (q) (eval-expo '(match 5) '() q))
+  '())
+
+(test "match-1a"
+  (run* (q) (eval-expo '(match 5 [5 6]) '() q))
+  '(6))
+
+(test "match-1b"
+  (run* (q) (eval-expo '(match 5 [x 6]) '() q))
+  '(6))
+
+(test "match-1c"
+  (run* (q) (eval-expo '(match 5 [x x]) '() q))
+  '(5))
+
+(test "match-1d"
+  (run* (q) (eval-expo '(match 5 [5 6] [7 8]) '() q))
+  '(6))
+
+(test "match-1e"
+  (run* (q) (eval-expo '(match 5 [x 6] [y 7]) '() q))
+  '(6))
+
+(test "match-1f"
+  (run* (q) (eval-expo '(match 5 [x 6] [x 7]) '() q))
+  '(6))
+
+
+
+(test "match-2"
+  (run* (q) (eval-expo '(match (cons 5 6) [`(,x . ,y) 7]) '() q))
+  '(7))
+
+(test "match-3"
+  (run* (q) (eval-expo '(match (cons 5 6) [`(,x . ,y) x]) '() q))
+  '(5))
+
+(test "match-4"
+  (run* (q) (eval-expo '(match (cons 5 6) [`(,x . ,y) y]) '() q))
+  '(6))
+
+(test "match-5"
+  (run* (q) (eval-expo '(match (cons 5 6) [7 8]) '() q))
+  '())
+
+(test "match-6"
+  (run* (q) (eval-expo '(match 4 [7 8]) '() q))
+  '())
+
+(test "match-7"
+  (run* (q) (eval-expo '(match '(lambda (y) (y z)) [`(lambda (,x) ,body) (cons x body)]) '() q))
+  '((y y z)))
+
+(test "match-8"
+  (run* (q) (eval-expo '(match '((lambda (y) (y z)) 5) [`(,rator ,rand) (cons rator (cons rand '()))]) '() q))
+  '(((lambda (y) (y z)) 5)))
+
+(test "match-9"
+  (run* (q) (eval-expo
+              '(match '((lambda (y) (y z)) 5)
+                 [`(lambda (,x) ,body) (cons 'lambda-expr (cons x (cons body '())))]
+                 [`(,rator ,rand) (cons 'app-expr (cons rator (cons rand '())))])
+              '()
+              q))
+  '((app-expr (lambda (y) (y z)) 5)))
+
+(test "match-10"
+  (run* (q) (eval-expo
+              '(match '(lambda (y) (y z))
+                 [`(lambda (,x) ,body) (cons 'lambda-expr (cons x (cons body '())))]
+                 [`(,rator ,rand) (cons 'app-expr (cons rator (cons rand '())))])
+              '()
+              q))
+  '((lambda-expr y (y z))))
+
+(test "match-11"
+  (run* (q) (eval-expo
+              '(match '(5 6 7)
+                 [`(,x ,y ,z) (cons 'first (cons x (cons y (cons z '()))))]
+                 [`(,u ,v ,w) (cons 'second (cons u (cons v (cons w '()))))])
+              '()
+              q))
+  '((first 5 6 7)))
+
+(test "match-12"
+  (run* (q) (eval-expo
+              '(match '(5 6 7)
+                 [`(,x ,y ,x) (cons 'first (cons x (cons y (cons x '()))))]
+                 [`(,u ,v ,w) (cons 'second (cons u (cons v (cons w '()))))])
+              '()
+              q))
+  '((second 5 6 7)))
+
+(test "match-13"
+  (run* (q) (eval-expo
+              '(match '(5 6 7)
+                 [`(,x ,y ,x) (cons 'first (cons x (cons y (cons x '()))))]
+                 [`(,x ,y ,z) (cons 'second (cons x (cons y (cons z '()))))])
+              '()
+              q))
+  '((second 5 6 7)))
+
+(test "match-14"
+  (run* (q) (eval-expo
+              '(match '(5 6 5)
+                 [`(,x ,y ,z) (cons 'first (cons x (cons y (cons z '()))))]
+                 [`(,u ,v ,w) (cons 'second (cons u (cons v (cons w '()))))])
+              '()
+              q))
+  '((first 5 6 5)))
+
+(test "match-15"
+  (run* (q) (eval-expo
+              '(match '(5 6 5)
+                 [`(,x ,y ,x) (cons 'first (cons x (cons y (cons x '()))))]
+                 [`(,u ,v ,w) (cons 'second (cons u (cons v (cons w '()))))])
+              '()
+              q))
+  '((first 5 6 5)))
+
+(test "match-16"
+  (run* (q) (eval-expo
+              '(match '(5 6 5)
+                 [`(,x ,y ,x) (cons 'first (cons x (cons y (cons x '()))))]
+                 [`(,x ,y ,z) (cons 'second (cons x (cons y (cons z '()))))])
+              '()
+              q))
+  '((first 5 6 5)))
+
+
+(test "match-17"
+  (run* (q) (eval-expo '(match '#t [#f 6] [#t 8]) '() q))
+  '(8))
+
+
+
+;; Racket-compatible 'symbol?' predicate syntax
+;;
+;; `(lambda (,(? symbol? x)) ,body)
+;;
+(test "match-symbol-0a"
+  (run* (q) (eval-expo
+             '(match 'w
+                [(? symbol? y) y])
+             '()
+             q))
+  '(w))
+
+(test "match-symbol-1"
+  (run* (q) (eval-expo
+             '(match '(lambda (y) (y z))
+                [`(lambda (,(? symbol? x)) ,body) (cons x body)])
+             '()
+             q))
+  '((y y z)))
+
+(test "match-symbol-2"
+  (run 1 (pat out) (eval-expo `(match ,pat [`(lambda (,(? symbol? x)) ,body) (cons x body)]) '() out))
+  '((('(lambda (_.0) _.1)
+      (_.0 . _.1))
+     (=/= ((_.0 closure)))
+   (sym _.0)
+   (absento (closure _.1)))))
+
+(test "match-symbol-3"
+  (run 3 (against out) (eval-expo `(match ,against [`(lambda (,(? symbol? x)) ,body) (cons x body)]) '() out))
+  '((('(lambda (_.0) _.1) (_.0 . _.1))
+     (=/= ((_.0 closure)))
+     (sym _.0)
+     (absento (closure _.1)))
+    (((match _.0 (_.0 '(lambda (_.1) _.2)) . _.3) (_.1 . _.2))
+     (=/= ((_.1 closure)))
+     (num _.0)
+     (sym _.1)
+     (absento (closure _.2)))
+    (((list 'lambda '(_.0) _.1) (_.0 . _.1))
+     (=/= ((_.0 closure)))
+     (num _.1)
+     (sym _.0))))
+
+(test "match-symbol-4"
+  (run 3 (body)
+    (eval-expo
+      `(match '(lambda (y) (y z))
+         [`(lambda (,(? symbol? x)) ,body) ,body])
+      '()
+      '(y y z)))
+  '('(y y z)
+    ((match _.0 (_.0 '(y y z)) . _.1)
+     (num _.0))
+    (list 'y 'y 'z)))
+
+
+
+
+(test "match-1a-backwards"
+  (run* (q) (eval-expo `(match 5
+                          [,q 6])
+                       '()
+                       '6))
+  '(5
+    `5
+    (_.0 (sym _.0))
+    ((? number? _.0) (sym _.0))
+    (`,_.0 (sym _.0))
+    (`,(? number? _.0) (sym _.0))))
+
+
+(test "match-1c-backwards"
+  (run* (q) (eval-expo `(match 5 [,q x]) '() 5))
+  '(x
+    (? number? x)
+    `,x
+    `,(? number? x)))
+
+(test "match-8-backwards-verify-a"
+  (run* (q)
+    (eval-expo
+      '(match '((lambda (y) (y z)) 5) [`(,rator ,rand unquote _.0) (cons rator (cons rand '()))])
+      '()
+      q))
+  '(((lambda (y) (y z)) 5)))
+
+(test "match-8-backwards-verify-b"
+  (run* (q)
+    (eval-expo
+      '(match '((lambda (y) (y z)) 5) [`(,rator ,rand unquote _.0) (cons rator (cons rand '()))])
+      '()
+      q))
+  '(((lambda (y) (y z)) 5)))
+
+(test "match-8-backwards-verify-c"
+  (run* (q)
+    (eval-expo
+      '(match '((lambda (y) (y z)) 5) [`(,rator ,rand unquote foo) (cons rator (cons rand '()))])
+      '()
+      q))
+  '(((lambda (y) (y z)) 5)))
+
+(test "match-8-backwards-verify-d"
+  (run* (q)
+    (eval-expo
+      '(match '((lambda (y) (y z)) 5) [`(,rator ,rand . (unquote foo)) (cons rator (cons rand '()))])
+      '()
+      q))
+  '(((lambda (y) (y z)) 5)))
+
+(test "match-8-backwards-verify-e"
+  (run* (q)
+    (eval-expo
+      '(match '((lambda (y) (y z)) 5) [`(,rator ,rand . ,foo) (cons rator (cons rand '()))])
+      '()
+      q))
+  '(((lambda (y) (y z)) 5)))
+
+
+
+(test "eval-expo-1"
+  (run* (q) (eval-expo '5 '() q))
+  '(5))
+
+(test "eval-expo-2"
+  (run* (q) (eval-expo 'x '() q))
+  '())
+
+(test "eval-expo-3"
+  (run* (q) (eval-expo '(lambda (x) x) '() q))
+  '((closure (lambda (x) x) ())))
+
+(test "eval-expo-4"
+  (run* (q) (eval-expo '((lambda (x) x) 5) '() q))
+  '(5))
+
+(test "eval-expo-5"
+  (run* (q) (eval-expo '((lambda (x) (lambda (y) x)) 5) '() q))
+  '((closure (lambda (y) x) (ext-env x 5 ()))))
+
+
+
+(test "quine-1"
+  (run 6 (q) (eval-expo q '() q))
+  '((_.0 (num _.0))
+    #t
+    #f
+    (((lambda (_.0) (list _.0 (list 'quote _.0)))
+      '(lambda (_.0) (list _.0 (list 'quote _.0))))
+     (=/= ((_.0 closure)) ((_.0 list)) ((_.0 quote)))
+     (sym _.0))
+    (((lambda (_.0)
+        (list (list 'lambda '(_.0) _.0) (list 'quote _.0)))
+      '(list (list 'lambda '(_.0) _.0) (list 'quote _.0)))
+     (=/= ((_.0 closure)) ((_.0 list)) ((_.0 quote)))
+     (sym _.0))
+    (((lambda (_.0)
+        (list _.0 (list (match _.1 (_.1 'quote) . _.2) _.0)))
+      '(lambda (_.0)
+         (list _.0 (list (match _.1 (_.1 'quote) . _.2) _.0))))
+     (=/= ((_.0 closure)) ((_.0 list)) ((_.0 match)))
+     (num _.1)
+     (sym _.0)
+     (absento (closure _.2)))))
+
+(test "closure-generation"
+  (run 10 (q)
+    (eval-expo
+     q
+     '()
+     '(closure (lambda (x) x) ())))
+  '((lambda (x) x)
+    ((match _.0 (_.0 (lambda (x) x)) . _.1)
+     (num _.0))
+    ((lambda () (lambda (x) x)))
+    ((match '_.0 (_.0 (lambda (x) x)) . _.1)
+     (num _.0))
+    ((match _.0 (`_.0 (lambda (x) x)) . _.1)
+     (num _.0))
+    ((match _.0 (_.1 _.2) (_.0 (lambda (x) x)) . _.3)
+     (=/= ((_.0 _.1)))
+     (num _.0 _.1))
+    (match '#f (#f (lambda (x) x)) . _.0)
+    (match '#t (#t (lambda (x) x)) . _.0)
+    ((match '_.0 (_.1 _.2) (_.0 (lambda (x) x)) . _.3)
+     (=/= ((_.0 _.1)))
+     (num _.0 _.1))
+    ((match _.0 (#f _.1) (_.0 (lambda (x) x)) . _.2)
+     (num _.0))))
+
+
+(printf "Long running tests...\n")
+
+(printf "This test takes a while...\n")
+(test "match-8-backwards"
+  (run* (q)
+    (eval-expo
+      `(match '((lambda (y) (y z)) 5)
+         [,q (cons rator (cons rand '()))])
+      '()
+      '((lambda (y) (y z)) 5)))
+  '(`(,rator ,rand)
+    `(,rator ,(? number? rand))
+    (`(,rator ,rand unquote _.0)
+     (=/= ((_.0 cons)) ((_.0 quote))
+          ((_.0 rand)) ((_.0 rator)))
+     (sym _.0))
+    (`(,rator ,(? number? rand) unquote _.0)
+     (=/= ((_.0 cons)) ((_.0 quote))
+          ((_.0 rand)) ((_.0 rator)))
+     (sym _.0))))
+
+(printf "This test takes a while...\n")
+(test "match-8-backwards-b"
+  (run* (q)
+    (eval-expo
+     `(match '((lambda (y) (y z)) w)
+        [,q (cons rator (cons rand '()))])
+     '()
+     '((lambda (y) (y z)) w)))
+  '(`(,rator ,rand)
+    `(,rator ,(? symbol? rand))
+    (`(,rator ,rand unquote _.0)
+     (=/= ((_.0 cons)) ((_.0 quote))
+          ((_.0 rand)) ((_.0 rator)))
+     (sym _.0))
+    (`(,rator ,(? symbol? rand) unquote _.0)
+     (=/= ((_.0 cons)) ((_.0 quote))
+          ((_.0 rand)) ((_.0 rator)))
+     (sym _.0))))
+
+
+
+
+
+
+
+
+
+
+
+
 ;; Standard Scheme definition of append.  I've wrapped the definition
 ;; in a 'let' to avoid shadowing Scheme's built-in 'append'
 ;; definition.
@@ -465,141 +847,55 @@
      (=/= ((_.0 closure)) ((_.0 list)) ((_.0 quote)))
      (sym _.0))))
 
-
-;; And, of course, we can generate quines in the context of the
-;; definition of 'append'.
-(define quines-in-context-of-append
-  (run 60 (q)
+(test "quines-in-context-of-append"
+  (run 10 (q)
     (evalo
      `(letrec ((append (lambda (l s)
                          (if (null? l)
                              s
                              (cons (car l) (append (cdr l) s))))))
         ,q)
-     q)))
-
-
-;; Here are a few of the generated quines.  All but the first and last
-;; example use 'append'.
-
-(test "quines-in-context-of-append-1"
-  (member? '((apply (lambda _.0 (list 'apply _.0 (list 'quote _.0)))
-                    '(lambda _.0 (list 'apply _.0 (list 'quote _.0))))
-             (=/= ((_.0 closure)) ((_.0 list)) ((_.0 quote)))
-             (sym _.0))
-           quines-in-context-of-append)
-  #t)
-
-(test "quines-in-context-of-append-2"
-  (member? '((apply
-              (lambda _.0
-                (list 'apply (apply append _.0) (list 'quote _.0)))
-              '(()
-                (lambda _.0
-                  (list 'apply (apply append _.0) (list 'quote _.0)))))
-             (=/= ((_.0 append)) ((_.0 apply)) ((_.0 closure))
-                  ((_.0 list)) ((_.0 quote)))
-             (sym _.0))
-           quines-in-context-of-append)
-  #t)
-
-(test "quines-in-context-of-append-3"
-  (member? '((apply
-              (lambda _.0
-                (list 'apply (apply append _.0)
-                      ((lambda _.1 _.1) 'quote _.0)))
-              '(()
-                (lambda _.0
-                  (list 'apply (apply append _.0)
-                        ((lambda _.1 _.1) 'quote _.0)))))
-             (=/= ((_.0 append)) ((_.0 apply)) ((_.0 closure))
-                  ((_.0 lambda)) ((_.0 list)) ((_.0 quote))
-                  ((_.1 closure)))
-             (sym _.0 _.1))
-           quines-in-context-of-append)
-  #t)
-
-(test "quines-in-context-of-append-4"
-  (member? '((apply
-              (lambda _.0
-                (list 'apply (apply append _.0)
-                      (apply (lambda _.1 (list 'quote _.1)) _.0)))
-              '(()
-                (lambda _.0
-                  (list 'apply (apply append _.0)
-                        (apply (lambda _.1 (list 'quote _.1)) _.0)))))
-             (=/= ((_.0 append)) ((_.0 apply)) ((_.0 closure))
-                  ((_.0 lambda)) ((_.0 list)) ((_.0 quote))
-                  ((_.1 closure)) ((_.1 list)) ((_.1 quote)))
-             (sym _.0 _.1))
-           quines-in-context-of-append)
-  #t)
-
-(test "quines-in-context-of-append-5"
-  (member? '((apply
-              (lambda _.0
-                (list (apply (lambda _.1 'apply) _.0)
-                      (apply append _.0) (list 'quote _.0)))
-              '(()
-                (lambda _.0
-                  (list (apply (lambda _.1 'apply) _.0)
-                        (apply append _.0) (list 'quote _.0)))))
-             (=/= ((_.0 append)) ((_.0 apply)) ((_.0 closure))
-                  ((_.0 lambda)) ((_.0 list)) ((_.0 quote))
-                  ((_.1 closure)) ((_.1 quote)))
-             (sym _.0 _.1))
-           quines-in-context-of-append)
-  #t)
-
-(test "quines-in-context-of-append-6"
-  (member? '((apply
-              (lambda _.0
-                (list 'apply (apply append _.0)
-                      (apply (lambda _.1 (list 'quote _.0)) _.0)))
-              '(()
-                (lambda _.0
-                  (list 'apply (apply append _.0)
-                        (apply (lambda _.1 (list 'quote _.0)) _.0)))))
-             (=/= ((_.0 _.1)) ((_.0 append)) ((_.0 apply))
-                  ((_.0 closure)) ((_.0 lambda)) ((_.0 list))
-                  ((_.0 quote)) ((_.1 closure)) ((_.1 list))
-                  ((_.1 quote)))
-             (sym _.0 _.1))
-           quines-in-context-of-append)
-  #t)
-
-(test "quines-in-context-of-append-7"
-  (member? '((apply
-              (lambda _.0
-                (list 'apply (apply append _.0)
-                      (list 'quote (apply (lambda _.1 _.1) _.0))))
-              '(()
-                (lambda _.0
-                  (list 'apply (apply append _.0)
-                        (list 'quote (apply (lambda _.1 _.1) _.0))))))
-             (=/= ((_.0 append)) ((_.0 apply)) ((_.0 closure))
-                  ((_.0 lambda)) ((_.0 list)) ((_.0 quote))
-                  ((_.1 closure)))
-             (sym _.0 _.1))
-           quines-in-context-of-append)
-  #t)
-
-(test "quines-in-context-of-append-8"
-  (member? '((apply
-              (lambda _.0
-                (list 'apply (apply (lambda (_.1) _.1) _.0)
-                      (apply (lambda _.2 ((lambda _.3 _.3) 'quote _.2))
-                             _.0)))
-              '((lambda _.0
-                  (list 'apply (apply (lambda (_.1) _.1) _.0)
-                        (apply (lambda _.2 ((lambda _.3 _.3) 'quote _.2))
-                               _.0)))))
-             (=/= ((_.0 apply)) ((_.0 closure)) ((_.0 lambda))
-                  ((_.0 list)) ((_.0 quote)) ((_.1 closure))
-                  ((_.2 closure)) ((_.2 lambda)) ((_.2 quote))
-                  ((_.3 closure)))
-             (sym _.0 _.1 _.2 _.3))
-           quines-in-context-of-append)
-  #t)
-
-
+     q))
+  '((_.0 (num _.0))
+    #t
+    #f
+    (((lambda (_.0) (list _.0 (list 'quote _.0)))
+      '(lambda (_.0) (list _.0 (list 'quote _.0))))
+     (=/= ((_.0 closure)) ((_.0 list)) ((_.0 quote)))
+     (sym _.0))
+    (((lambda (_.0)
+        (list _.0 (list (match _.1 (_.1 'quote) . _.2) _.0)))
+      '(lambda (_.0)
+         (list _.0 (list (match _.1 (_.1 'quote) . _.2) _.0))))
+     (=/= ((_.0 closure)) ((_.0 list)) ((_.0 match)))
+     (num _.1) (sym _.0) (absento (closure _.2)))
+    (((lambda (_.0)
+        (list (list 'lambda '(_.0) _.0) (list 'quote _.0)))
+      '(list (list 'lambda '(_.0) _.0) (list 'quote _.0)))
+     (=/= ((_.0 closure)) ((_.0 list)) ((_.0 quote)))
+     (sym _.0))
+    (((lambda (_.0) (list _.0 ((lambda _.1 _.1) 'quote _.0)))
+      '(lambda (_.0) (list _.0 ((lambda _.1 _.1) 'quote _.0))))
+     (=/= ((_.0 closure)) ((_.0 lambda)) ((_.0 list))
+          ((_.0 quote)) ((_.1 closure)))
+     (sym _.0 _.1))
+    (((lambda (_.0) ((lambda _.1 _.1) _.0 (list 'quote _.0)))
+      '(lambda (_.0) ((lambda _.1 _.1) _.0 (list 'quote _.0))))
+     (=/= ((_.0 closure)) ((_.0 lambda)) ((_.0 list))
+          ((_.0 quote)) ((_.1 closure)))
+     (sym _.0 _.1))
+    (((lambda (_.0)
+        (list ((lambda _.1 _.0)) (list 'quote _.0)))
+      '(lambda (_.0)
+         (list ((lambda _.1 _.0)) (list 'quote _.0))))
+     (=/= ((_.0 _.1)) ((_.0 closure)) ((_.0 lambda))
+          ((_.0 list)) ((_.0 quote)) ((_.1 closure)))
+     (sym _.0 _.1))
+    (((lambda (_.0)
+        (list (list 'lambda '(_.0) _.0)
+              (list (match _.1 (_.1 'quote) . _.2) _.0)))
+      '(list (list 'lambda '(_.0) _.0)
+             (list (match _.1 (_.1 'quote) . _.2) _.0)))
+     (=/= ((_.0 closure)) ((_.0 list)) ((_.0 match))
+          ((_.0 quote)))
+     (num _.1) (sym _.0) (absento (closure _.2)))))
