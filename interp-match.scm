@@ -2,11 +2,22 @@
 
 ;; match grammar
 ;;
+;;
 ;; (match ,expr ,clause ,clauses ...)
 ;;
-;; clause ::= (,pattern ,expr)
+;; clause ::= (,quasipattern ,expr)
 ;;
-;; pattern ::= symbol | number | #t | #f | () | 
+;; quasipattern ::= literal | (,quasipattern . ,quasipattern) | (unquote ,pattern)
+;;
+;; literal ::= symbol | number | #t | #f | ()
+;;
+;; pattern ::= var | (? ,pred ,var)
+;;
+;; var ::= <symbol>
+;;
+;; pred ::= symbol?
+
+
 
 ;; really should be a constraint built into miniKanren
 (define not-symbolo
