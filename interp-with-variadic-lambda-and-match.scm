@@ -1,3 +1,8 @@
+;; TODO
+;;
+;; * add quasiquote/unquote so we can easily and efficiently write
+;; 'lambda' and 'fold' as macros.
+
 (load "mk/mk.scm")
 
 ;; supports variadic lambda: (lambda x x)
