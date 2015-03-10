@@ -384,6 +384,53 @@
   '((? number? n)
     `,(? number? n)))
 
+(test "Scheme-interpreter-2k"
+  (run* (q)
+    (eval-expo
+      `(letrec ((eval-expr
+                 (lambda (expr env)
+                   (match expr
+                     [(? number? n) n]
+                     [(? symbol? x) (env x)]
+                     [`(lambda (,(? symbol? x)) ,body)
+                      (lambda (a)
+                        (eval-expr body (lambda (y)
+                                          (if (equal? x y)
+                                              a
+                                              (env y)))))]
+                     [`(cons ,e1 ,e2)
+                      (cons (eval-expr e1 env) (eval-expr e2 env))]
+                     [`(,rator ,rand)
+                      ((eval-expr rator env) (eval-expr rand env))]))))
+         (eval-expr '(cons 5 6) (lambda (y) ((lambda (z) z)))))
+      '()
+      q))
+  '((5 . 6)))
+
+(test "Scheme-interpreter-2l"
+  (run* (q)
+    (eval-expo
+      `(letrec ((eval-expr
+                 (lambda (expr env)
+                   (match expr
+                     [(? number? n) n]
+                     [(? symbol? x) (env x)]
+                     [`(lambda (,(? symbol? x)) ,body)
+                      (lambda (a)
+                        (eval-expr body (lambda (y)
+                                          (if (equal? x y)
+                                              a
+                                              (env y)))))]
+                     [`(cons ,e1 ,e2)
+                      (cons (eval-expr e1 env) (eval-expr e2 env))]
+                     [`(,rator ,rand)
+                      ((eval-expr rator env) (eval-expr rand env))]))))
+         (eval-expr '(cons (cons 5 6) (cons 7 8)) (lambda (y) ((lambda (z) z)))))
+      '()
+      q))
+  '(((5 . 6) . (7 . 8))))
+
+
 
 
 
