@@ -106,7 +106,7 @@
   '(5))
 
 (test "Scheme-interpreter-2b"
-  (run 3 (q)
+  (run 5 (q)
     (eval-expo
       `(letrec ((eval-expr
                  (lambda (expr env)
@@ -131,7 +131,47 @@
      (sym _.0))
     (((lambda (_.0) _.0) 5)
      (=/= ((_.0 closure)))
+     (sym _.0))
+    (((lambda (_.0) 5) (lambda (_.1) _.2))
+     (=/= ((_.0 closure)) ((_.1 closure)))
+     (sym _.0 _.1)
+     (absento (closure _.2)))
+    (((lambda (_.0) ((lambda (_.1) 5) _.2)) _.3)
+     (=/= ((_.0 closure)) ((_.1 closure)))
+     (num _.2 _.3)
+     (sym _.0 _.1))))
+
+(test "Scheme-interpreter-2b"
+  (run 5 (q)
+    (eval-expo
+      `(letrec ((eval-expr
+                 (lambda (expr env)
+                   (match expr
+                     [(? number? n) n]
+                     [(? symbol? x) (env x)]
+                     [`(lambda (,(? symbol? x)) ,body)
+                      (lambda (a)
+                        (eval-expr body (lambda (y)
+                                          (if (equal? x y)
+                                              a
+                                              (env y)))))]
+                     [`(,rator ,rand)
+                      ((eval-expr rator env) (eval-expr rand env))]))))
+         (eval-expr ,q (lambda (y) ((lambda (z) z)))))
+      '()
+      '5))
+  '(5
+    '5
+    ('((lambda (_.0) 5) _.1)
+     (=/= ((_.0 closure)))
+     (num _.1)
+     (sym _.0))
+    ((match _.0 (_.0 5) . _.1)
+     (num _.0))
+    ('((lambda (_.0) _.0) 5)
+     (=/= ((_.0 closure)))
      (sym _.0))))
+
 
 
 (test "Scheme-interpreter-3"
