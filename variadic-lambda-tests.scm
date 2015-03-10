@@ -482,7 +482,7 @@
       q))
   '(#t))
 
-(test "Scheme-interpreter-20"
+(test "Scheme-interpreter-2o"
   (run* (q)
     (eval-expo
       `(letrec ((eval-expr
@@ -508,6 +508,68 @@
       '()
       q))
   '(#f))
+
+(test "Scheme-interpreter-2p"
+  (run* (q)
+    (eval-expo
+      `(letrec ((eval-expr
+                 (lambda (expr env)
+                   (match expr
+                     [(? number? n) n]
+                     [(? symbol? x) (env x)]
+                     [`(lambda (,(? symbol? x)) ,body)
+                      (lambda (a)
+                        (eval-expr body (lambda (y)
+                                          (if (equal? x y)
+                                              a
+                                              (env y)))))]
+                     [`(quote ,datum) datum]
+                     [`(null? ,e) (null? (eval-expr e env))]                     
+                     [`(car ,e) (car (eval-expr e env))]
+                     [`(cdr ,e) (cdr (eval-expr e env))]
+                     [`(cons ,e1 ,e2)
+                      (cons (eval-expr e1 env) (eval-expr e2 env))]
+                     [`(if ,e1 ,e2 ,e3)
+                      (if (eval-expr e1 env)
+                          (eval-expr e2 env)
+                          (eval-expr e3 env))]
+                     [`(,rator ,rand)
+                      ((eval-expr rator env) (eval-expr rand env))]))))
+         (eval-expr '(if (null? '()) 5 6) (lambda (y) ((lambda (z) z)))))
+      '()
+      q))
+  '(5))
+
+(test "Scheme-interpreter-2q"
+  (run* (q)
+    (eval-expo
+      `(letrec ((eval-expr
+                 (lambda (expr env)
+                   (match expr
+                     [(? number? n) n]
+                     [(? symbol? x) (env x)]
+                     [`(lambda (,(? symbol? x)) ,body)
+                      (lambda (a)
+                        (eval-expr body (lambda (y)
+                                          (if (equal? x y)
+                                              a
+                                              (env y)))))]
+                     [`(quote ,datum) datum]
+                     [`(null? ,e) (null? (eval-expr e env))]                     
+                     [`(car ,e) (car (eval-expr e env))]
+                     [`(cdr ,e) (cdr (eval-expr e env))]
+                     [`(cons ,e1 ,e2)
+                      (cons (eval-expr e1 env) (eval-expr e2 env))]
+                     [`(if ,e1 ,e2 ,e3)
+                      (if (eval-expr e1 env)
+                          (eval-expr e2 env)
+                          (eval-expr e3 env))]
+                     [`(,rator ,rand)
+                      ((eval-expr rator env) (eval-expr rand env))]))))
+         (eval-expr '(if (null? (cons 2 3)) 5 6) (lambda (y) ((lambda (z) z)))))
+      '()
+      q))
+  '(6))
 
 
 
