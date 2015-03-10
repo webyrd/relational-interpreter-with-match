@@ -1,5 +1,5 @@
 (load "interp-match.scm")
-(load "test-check.scm")
+(load "mk/test-check.scm")
 
 
 (test "match-0"
