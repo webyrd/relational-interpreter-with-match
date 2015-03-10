@@ -209,9 +209,8 @@
       '()
       '(y y z)))
   '('(y y z)
-    ((match _.0 (_.0 '(y y z)) . _.1)
-     (num _.0))
-    (list 'y 'y 'z)))
+    (list 'y 'y 'z)
+    (list 'y x 'z)))
 
 
 
@@ -314,14 +313,11 @@
       '(list (list 'lambda '(_.0) _.0) (list 'quote _.0)))
      (=/= ((_.0 closure)) ((_.0 list)) ((_.0 quote)))
      (sym _.0))
-    (((lambda (_.0)
-        (list _.0 (list (match _.1 (_.1 'quote) . _.2) _.0)))
-      '(lambda (_.0)
-         (list _.0 (list (match _.1 (_.1 'quote) . _.2) _.0))))
-     (=/= ((_.0 closure)) ((_.0 list)) ((_.0 match)))
-     (num _.1)
-     (sym _.0)
-     (absento (closure _.2)))))
+    (((lambda (_.0) (list _.0 ((lambda _.1 _.1) 'quote _.0)))
+      '(lambda (_.0) (list _.0 ((lambda _.1 _.1) 'quote _.0))))
+     (=/= ((_.0 closure)) ((_.0 lambda)) ((_.0 list))
+          ((_.0 quote)) ((_.1 closure)))
+     (sym _.0 _.1))))
 
 (test "closure-generation"
   (run 10 (q)
@@ -388,11 +384,6 @@
      (=/= ((_.0 cons)) ((_.0 quote))
           ((_.0 rand)) ((_.0 rator)))
      (sym _.0))))
-
-
-
-
-
 
 
 
