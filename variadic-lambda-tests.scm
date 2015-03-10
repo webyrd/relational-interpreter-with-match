@@ -576,45 +576,19 @@
     ('(a b c d) '(e))
     ('(a b c d e) '())
     ('(a b c d e) (list))
-    (('() (apply (lambda _.0 '(a b c d e)) '()))
-     (=/= ((_.0 quote)))
-     (sym _.0))
-    (('(a b c d e) (apply (lambda _.0 _.0) '()))
-     (sym _.0))
-    (('(a) (apply (lambda _.0 '(b c d e)) '()))
-     (=/= ((_.0 quote)))
-     (sym _.0))
-    (('(a b) (apply (lambda _.0 '(c d e)) '()))
-     (=/= ((_.0 quote)))
-     (sym _.0))
-    (('(a b c) (apply (lambda _.0 '(d e)) '()))
-     (=/= ((_.0 quote)))
-     (sym _.0))
-    (('(a b c d) (apply (lambda _.0 '(e)) '()))
-     (=/= ((_.0 quote)))
-     (sym _.0))
-    (('(a b c d e) (apply (lambda _.0 '()) '()))
-     (=/= ((_.0 quote)))
-     (sym _.0))
     ('(a b c d) (list 'e))
-    (('(a b c d) (apply (lambda _.0 _.0) '(e)))
-     (sym _.0))
-    (('() (apply (lambda _.0 '(a b c d e)) '(_.1)))
-     (=/= ((_.0 quote)))
-     (sym _.0)
-     (absento (closure _.1)))
-    (('(a) (apply (lambda _.0 '(b c d e)) '(_.1)))
-     (=/= ((_.0 quote)))
-     (sym _.0)
-     (absento (closure _.1)))
-    (('(a b) (apply (lambda _.0 '(c d e)) '(_.1)))
-     (=/= ((_.0 quote)))
-     (sym _.0)
-     (absento (closure _.1)))
-    (('(a b c) (apply (lambda _.0 '(d e)) '(_.1)))
-     (=/= ((_.0 quote)))
-     (sym _.0)
-     (absento (closure _.1)))))
+    ((list) '(a b c d e))
+    (('() (match _.0 (_.0 '(a b c d e)) . _.1)) (num _.0))
+    (('(a) (match _.0 (_.0 '(b c d e)) . _.1)) (num _.0))
+    (('(a b) (match _.0 (_.0 '(c d e)) . _.1)) (num _.0))
+    (('(a b c) (match _.0 (_.0 '(d e)) . _.1)) (num _.0))
+    (('(a b c d) (match _.0 (_.0 '(e)) . _.1)) (num _.0))
+    (('(a b c d e) (match _.0 (_.0 '()) . _.1)) (num _.0))
+    ('(a b c) (list 'd 'e))
+    (('() (match '_.0 (_.0 '(a b c d e)) . _.1)) (num _.0))
+    (('(a) (match '_.0 (_.0 '(b c d e)) . _.1)) (num _.0))
+    (('(a b) (match '_.0 (_.0 '(c d e)) . _.1)) (num _.0))
+    (('(a b c) (match '_.0 (_.0 '(d e)) . _.1)) (num _.0))))
 
 ;; Sure enough, later answers call 'list', and even use variadic
 ;; 'lambda' and procedure application.  So our Scheme 'append',
@@ -677,7 +651,7 @@
      '(a b c d e))
     (absento 'a q))
   '(append
-    ((apply (lambda _.0 append) '())
+    (((lambda _.0 append))
      (=/= ((_.0 a)) ((_.0 append)))
      (sym _.0))))
 
@@ -705,8 +679,10 @@
         (append '(a b c) '(d e)))
      '(a b c d e)))
   '((car l)
-    ((apply (lambda _.0 (car l)) s)
-     (=/= ((_.0 a)) ((_.0 car)) ((_.0 l))) (sym _.0))))
+    ((match l (`(,_.0 unquote _.1) _.0) . _.2)
+     (=/= ((_.0 _.1)) ((_.0 a)) ((_.1 a)))
+     (sym _.0 _.1)
+     (absento (a _.2)))))
 
 
 ;; One fun thing we can do with the relational interpreter is generate
@@ -718,132 +694,79 @@
      q
      '(I love you)))
   '('(I love you)
-    ((apply (lambda _.0 '(I love you)) '())
-     (=/= ((_.0 quote)))
-     (sym _.0))
-    ((apply (lambda _.0 '(I love you)) '(_.1))
-     (=/= ((_.0 quote)))
-     (sym _.0)
-     (absento (closure _.1)))
-    ((apply (lambda _.0 '(I love you)) '(_.1 _.2))
-     (=/= ((_.0 quote)))
-     (sym _.0)
-     (absento (closure _.1) (closure _.2)))
-    ((apply (lambda (_.0) '(I love you)) '(_.1))
-     (=/= ((_.0 quote)))
-     (sym _.0)
-     (absento (closure _.1)))
-    ((apply (lambda (_.0) _.0) '((I love you)))
-     (sym _.0))
     (list 'I 'love 'you)
+    ((match _.0 (_.0 '(I love you)) . _.1)
+     (num _.0))
     (((lambda _.0 '(I love you)))
      (=/= ((_.0 quote)))
      (sym _.0))
-    ((apply (lambda _.0 '(I love you)) '(_.1 _.2 _.3))
+    (((lambda _.0 '(I love you)) _.1)
      (=/= ((_.0 quote)))
-     (sym _.0)
-     (absento (closure _.1) (closure _.2) (closure _.3)))
+     (num _.1) (sym _.0))
     (((lambda _.0 '(I love you)) '_.1)
      (=/= ((_.0 quote)))
      (sym _.0)
-     (absento (closure _.1)))))
+     (absento (closure _.1)))
+    ((match '_.0 (_.0 '(I love you)) . _.1)
+     (num _.0))
+    (((lambda _.0 '(I love you)) _.1 _.2)
+     (=/= ((_.0 quote)))
+     (num _.1 _.2)
+     (sym _.0))
+    (((lambda _.0 '(I love you)) _.1 '_.2)
+     (=/= ((_.0 quote)))
+     (num _.1)
+     (sym _.0)
+     (absento (closure _.2)))
+    ((lambda () '(I love you)))))
 
 
-;; Here is where the real fun begins!
-;;
-;; We can run a similar query to the one above, generating one
-;; thousand Scheme expressions that evaluate to the list '(I love you)'.
-;; However, we introduce a new twist.  We place the query variable
-;; in the body of the 'letrec' in which we have defined 'append'.
-;; Therefore, miniKanren is free to infer expressions that use 'append',
-;; even though 'append' is not one of the primitives built into
-;; the relational Scheme interpreter!
-(define I-love-you-append (run 1000 (q)
-                            (evalo
-                             `(letrec ((append (lambda (l s)
-                                                 (if (null? l)
-                                                     s
-                                                     (cons (car l) (append (cdr l) s))))))
-                                ,q)
-                             '(I love you))))
-
-;; Here are a few interesting answers, all of which evaluate to '(I love you)'.
-
-(test "I-love-you-append-1"
-  (member? '(apply append '((I love) (you)))
-           I-love-you-append)
-  #t)
-
-(test "I-love-you-append-2"
-  (member? '((apply (lambda _.0 (apply append '((I love) (you)))) '())
-             (=/= ((_.0 append)) ((_.0 apply)) ((_.0 quote)))
-             (sym _.0))
-           I-love-you-append)
-  #t)
-
-(test "I-love-you-append-3"
-  (member? '(((lambda _.0 '(I love you)) append append append append)
-             (=/= ((_.0 quote))) (sym _.0))
-           I-love-you-append)
-  #t)
-
-(test "I-love-you-append-4"
-  (member? '((apply (lambda _.0 (apply append '((I) (love you)))) '())
-             (=/= ((_.0 append)) ((_.0 apply)) ((_.0 quote)))
-             (sym _.0))
-           I-love-you-append)
-  #t)
-
-(test "I-love-you-append-5"
-  (member? '((apply append (apply (lambda _.0 '((I love) (you))) '()))
-             (=/= ((_.0 quote))) (sym _.0))
-           I-love-you-append)
-  #t)
-
-(test "I-love-you-append-6"
-  (member? '((apply (lambda _.0 (car _.0)) '((I love you)))
-             (=/= ((_.0 car))) (sym _.0))
-           I-love-you-append)
-  #t)
-
-;; This example illustrates how 'append' can be used as a "dummy" value,
-;; passed into the variadic function but never used.
-(test "I-love-you-append-7"
-  (member? '(((lambda _.0 '(I love you)) append append append append)
-             (=/= ((_.0 quote))) (sym _.0))
-           I-love-you-append)
-  #t)
+(test "I-love-you-append"
+  (run 10 (q)
+    (evalo
+     `(letrec ((append (lambda (l s)
+                         (if (null? l)
+                             s
+                             (cons (car l) (append (cdr l) s))))))
+        ,q)
+     '(I love you)))
+  '('(I love you)
+    ((match _.0 (_.0 '(I love you)) . _.1)
+     (num _.0))
+    (list 'I 'love 'you)
+    ((match '_.0 (_.0 '(I love you)) . _.1)
+     (num _.0))
+    (((lambda _.0 '(I love you)))
+     (=/= ((_.0 quote)))
+     (sym _.0))
+    ((match _.0 (`_.0 '(I love you)) . _.1)
+     (num _.0))
+    (((lambda _.0 '(I love you)) _.1)
+     (=/= ((_.0 quote)))
+     (num _.1)
+     (sym _.0))
+    ((match _.0 (_.1 _.2) (_.0 '(I love you)) . _.3)
+     (=/= ((_.0 _.1)))
+     (num _.0 _.1))
+    (match '#f (#f '(I love you)) . _.0)
+    ((list (match _.0 (_.0 'I) . _.1) 'love 'you)
+     (num _.0))))
 
 
 ;; Our relational interpreter can also generate quines, which are
 ;; Scheme expressions that evaluate to themselves.
 (test "simple quines"
   (run 5 (q) (evalo q q))
-  '(#t
+  '((_.0 (num _.0))
+    #t
     #f
-    ((apply
-      (lambda _.0
-        (list 'apply (apply (lambda (_.1) _.1) _.0)
-              (list 'quote _.0)))
-      '((lambda _.0
-          (list 'apply (apply (lambda (_.1) _.1) _.0)
-                (list 'quote _.0)))))
-     (=/= ((_.0 apply)) ((_.0 closure)) ((_.0 lambda))
-          ((_.0 list)) ((_.0 quote)) ((_.1 closure)))
-     (sym _.0 _.1))
-    ((apply
-      (lambda _.0
-        (list (apply (lambda _.1 'apply) '())
-              (apply (lambda (_.2) _.2) _.0) (list 'quote _.0)))
-      '((lambda _.0
-          (list (apply (lambda _.1 'apply) '())
-                (apply (lambda (_.2) _.2) _.0) (list 'quote _.0)))))
-     (=/= ((_.0 apply)) ((_.0 closure)) ((_.0 lambda))
-          ((_.0 list)) ((_.0 quote)) ((_.1 closure))
-          ((_.1 quote)) ((_.2 closure)))
-     (sym _.0 _.1 _.2))
-    ((apply (lambda _.0 (list 'apply _.0 (list 'quote _.0)))
-            '(lambda _.0 (list 'apply _.0 (list 'quote _.0))))
+    (((lambda (_.0) (list _.0 (list 'quote _.0)))
+      '(lambda (_.0) (list _.0 (list 'quote _.0))))
+     (=/= ((_.0 closure)) ((_.0 list)) ((_.0 quote)))
+     (sym _.0))
+    (((lambda (_.0)
+        (list (list 'lambda '(_.0) _.0) (list 'quote _.0)))
+      '(list (list 'lambda '(_.0) _.0) (list 'quote _.0)))
      (=/= ((_.0 closure)) ((_.0 list)) ((_.0 quote)))
      (sym _.0))))
 
