@@ -571,6 +571,39 @@
       q))
   '(6))
 
+(test "Scheme-interpreter-2r"
+  (run* (q)
+    (eval-expo
+      `(letrec ((eval-expr
+                 (lambda (expr env)
+                   (match expr
+                     [(? number? n) n]
+                     [(? symbol? x) (env x)]
+                     [`(lambda (,(? symbol? x)) ,body)
+                      (lambda (a)
+                        (eval-expr body (lambda (y)
+                                          (if (equal? x y)
+                                              a
+                                              (env y)))))]
+                     [`(quote ,datum) datum]
+                     [`(null? ,e) (null? (eval-expr e env))]                     
+                     [`(car ,e) (car (eval-expr e env))]
+                     [`(cdr ,e) (cdr (eval-expr e env))]
+                     [`(cons ,e1 ,e2)
+                      (cons (eval-expr e1 env) (eval-expr e2 env))]
+                     [`(let ((,x ,e)) ,body)
+                      (eval-expr (list (list 'lambda (list x) body) e) env)]
+                     [`(if ,e1 ,e2 ,e3)
+                      (if (eval-expr e1 env)
+                          (eval-expr e2 env)
+                          (eval-expr e3 env))]
+                     [`(,rator ,rand)
+                      ((eval-expr rator env) (eval-expr rand env))]))))
+         (eval-expr '(let ((z (cons 3 4))) (cons z 5)) (lambda (y) ((lambda (z) z)))))
+      '()
+      q))
+  '(((3 . 4) . 5)))
+
 
 
 
