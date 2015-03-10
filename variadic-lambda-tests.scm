@@ -84,7 +84,7 @@
                                                        (eval-expr rand env)))))))
                                           ()))))))))
 
-(test "Scheme-interpreter-2"
+(test "Scheme-interpreter-2a"
   (run* (q)
     (eval-expo
       `(letrec ((eval-expr
@@ -104,6 +104,35 @@
       '()
       q))
   '(5))
+
+(test "Scheme-interpreter-2b"
+  (run 3 (q)
+    (eval-expo
+      `(letrec ((eval-expr
+                 (lambda (expr env)
+                   (match expr
+                     [(? number? n) n]
+                     [(? symbol? x) (env x)]
+                     [`(lambda (,(? symbol? x)) ,body)
+                      (lambda (a)
+                        (eval-expr body (lambda (y)
+                                          (if (equal? x y)
+                                              a
+                                              (env y)))))]
+                     [`(,rator ,rand)
+                      ((eval-expr rator env) (eval-expr rand env))]))))
+         (eval-expr ',q (lambda (y) ((lambda (z) z)))))
+      '()
+      '5))
+  '(5
+    (((lambda (_.0) 5) _.1)
+     (=/= ((_.0 closure)))
+     (num _.1)
+     (sym _.0))
+    (((lambda (_.0) _.0) 5)
+     (=/= ((_.0 closure)))
+     (sym _.0))))
+
 
 (test "Scheme-interpreter-3"
   (run* (q)
