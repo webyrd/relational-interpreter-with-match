@@ -826,6 +826,275 @@
       q))
   '((6 y z)))
 
+
+
+
+
+(test "Scheme-interpreter-love-1"
+  (run 10 (q)
+    (eval-expo
+      `(letrec ((eval-expr
+                 (lambda (expr env)
+                   (match expr
+                     [`(quote ,datum) datum]
+                     [(? symbol? x) (env x)]
+                     [`(lambda (,(? symbol? x)) ,body)
+                      (lambda (a)
+                        (eval-expr body (lambda (y)
+                                          (if (equal? x y)
+                                              a
+                                              (env y)))))]
+                     [`(cons ,e1 ,e2)
+                      (cons (eval-expr e1 env) (eval-expr e2 env))]
+                     [`(,rator ,rand)
+                      ((eval-expr rator env) (eval-expr rand env))]))))
+         (eval-expr ',q (lambda (y) ((lambda (z) z)))))
+      '()
+      '(I love you)))
+  '('(I love you)
+    (cons 'I '(love you))
+    (((lambda (_.0) '(I love you)) '_.1) (=/= ((_.0 closure))) (sym _.0) (absento (closure _.1)))
+    (((lambda (_.0) _.0) '(I love you)) (=/= ((_.0 closure))) (sym _.0))
+    (cons 'I (cons 'love '(you)))
+    (((lambda (_.0) '(I love you)) (lambda (_.1) _.2)) (=/= ((_.0 closure)) ((_.1 closure))) (sym _.0 _.1) (absento (closure _.2)))
+    (((lambda (_.0) (cons 'I '(love you))) '_.1) (=/= ((_.0 closure))) (sym _.0) (absento (closure _.1)))
+    ((cons ((lambda (_.0) 'I) '_.1) '(love you)) (=/= ((_.0 closure))) (sym _.0) (absento (closure _.1)))
+    ((cons ((lambda (_.0) 'I) '_.1) (cons 'love '(you))) (=/= ((_.0 closure))) (sym _.0) (absento (closure _.1)))
+    (((lambda (_.0) (cons 'I _.0)) '(love you)) (=/= ((_.0 closure))) (sym _.0))))
+
+;; 2 collections
+;; 2888 ms elapsed cpu time, including 0 ms collecting
+;; 2889 ms elapsed real time, including 0 ms collecting
+;; 17578736 bytes allocated
+(test "Scheme-interpreter-quines-0"
+  (run 1 (q)
+    (eval-expo
+     `(letrec ((eval-expr
+                (lambda (expr env)
+                  (match expr
+                    [`(quote ,datum) datum]
+                    [(? symbol? x) (env x)]
+                    [`(lambda (,(? symbol? x)) ,body)
+                     (lambda (a)
+                       (eval-expr body (lambda (y)
+                                         (if (equal? x y)
+                                             a
+                                             (env y)))))]
+                    [`(cons ,e1 ,e2)
+                     (cons (eval-expr e1 env) (eval-expr e2 env))]
+                    [`(,rator ,rand)
+                     ((eval-expr rator env) (eval-expr rand env))]))))
+        (eval-expr '((lambda (_.0)
+                       (cons _.0 (cons (cons 'quote (cons _.0 '())) '())))
+                     '(lambda (_.0)
+                        (cons _.0 (cons (cons 'quote (cons _.0 '())) '()))))
+                   (lambda (y) ((lambda (z) z)))))
+     '()
+     '((lambda (_.0)
+         (cons _.0 (cons (cons 'quote (cons _.0 '())) '())))
+       '(lambda (_.0)
+          (cons _.0 (cons (cons 'quote (cons _.0 '())) '()))))))
+  '(_.0))
+
+;; 2 collections
+;; 2744 ms elapsed cpu time, including 0 ms collecting
+;; 2746 ms elapsed real time, including 0 ms collecting
+;; 17580160 bytes allocated
+(test "Scheme-interpreter-quines-1"
+  (run 1 (q)
+    (eval-expo
+      `(letrec ((eval-expr
+                 (lambda (expr env)
+                   (match expr
+                     [`(quote ,datum) datum]
+                     [(? symbol? x) (env x)]
+                     [`(lambda (,(? symbol? x)) ,body)
+                      (lambda (a)
+                        (eval-expr body (lambda (y)
+                                          (if (equal? x y)
+                                              a
+                                              (env y)))))]
+                     [`(cons ,e1 ,e2)
+                      (cons (eval-expr e1 env) (eval-expr e2 env))]
+                     [`(,rator ,rand)
+                      ((eval-expr rator env) (eval-expr rand env))]))))
+         (eval-expr '((lambda (_.0)
+                        (cons _.0 (cons (cons 'quote (cons _.0 '())) '())))
+                      '(lambda (_.0)
+                         (cons _.0 (cons (cons 'quote (cons _.0 '())) '()))))
+                    (lambda (y) ((lambda (z) z)))))
+      '()
+      q))
+  '(((lambda (_.0)
+       (cons _.0 (cons (cons 'quote (cons _.0 '())) '())))
+     '(lambda (_.0)
+        (cons _.0 (cons (cons 'quote (cons _.0 '())) '()))))))
+
+;; 2 collections
+;; 2583 ms elapsed cpu time, including 0 ms collecting
+;; 2584 ms elapsed real time, including 0 ms collecting
+;; 17580576 bytes allocated
+(test "Scheme-interpreter-quines-2"
+  (run 1 (q)
+    (== '((lambda (_.0)
+            (cons _.0 (cons (cons 'quote (cons _.0 '())) '())))
+          '(lambda (_.0)
+             (cons _.0 (cons (cons 'quote (cons _.0 '())) '()))))
+        q)
+    (eval-expo
+      `(letrec ((eval-expr
+                 (lambda (expr env)
+                   (match expr
+                     [`(quote ,datum) datum]
+                     [(? symbol? x) (env x)]
+                     [`(lambda (,(? symbol? x)) ,body)
+                      (lambda (a)
+                        (eval-expr body (lambda (y)
+                                          (if (equal? x y)
+                                              a
+                                              (env y)))))]
+                     [`(cons ,e1 ,e2)
+                      (cons (eval-expr e1 env) (eval-expr e2 env))]
+                     [`(,rator ,rand)
+                      ((eval-expr rator env) (eval-expr rand env))]))))
+         (eval-expr ',q
+                    (lambda (y) ((lambda (z) z)))))
+      '()
+      q))
+  '(((lambda (_.0)
+       (cons _.0 (cons (cons 'quote (cons _.0 '())) '())))
+     '(lambda (_.0)
+        (cons _.0 (cons (cons 'quote (cons _.0 '())) '()))))))
+
+#|
+;; too slow to come back
+(test "Scheme-interpreter-quines-3"
+  (run 1 (q)
+    (eval-expo
+      `(letrec ((eval-expr
+                 (lambda (expr env)
+                   (match expr
+                     [`(quote ,datum) datum]
+                     [(? symbol? x) (env x)]
+                     [`(lambda (,(? symbol? x)) ,body)
+                      (lambda (a)
+                        (eval-expr body (lambda (y)
+                                          (if (equal? x y)
+                                              a
+                                              (env y)))))]
+                     [`(cons ,e1 ,e2)
+                      (cons (eval-expr e1 env) (eval-expr e2 env))]
+                     [`(,rator ,rand)
+                      ((eval-expr rator env) (eval-expr rand env))]))))
+         (eval-expr ',q
+                    (lambda (y) ((lambda (z) z)))))
+      '()
+      q))
+  '???)
+|#
+
+
+
+
+(test "Scheme-interpreter-list-1"
+  (run 1 (q)
+    (eval-expo
+      `(letrec ((eval-expr
+                 (lambda (expr env)
+                   (match expr
+                     [`(quote ,datum) datum]
+                     [(? symbol? x) (env x)]
+                     [`(lambda (,(? symbol? x)) ,body)
+                      (lambda (a)
+                        (eval-expr body (lambda (y)
+                                          (if (equal? x y)
+                                              a
+                                              (env y)))))]
+                     [`(list) '()]
+                     [`(list ,e . ,e*)
+                      (cons (eval-expr e env)
+                            (eval-expr (cons 'list e*) env))]
+                     [`(,rator ,rand)
+                      ((eval-expr rator env) (eval-expr rand env))]))))
+         (eval-expr '(list 'a 'b 'c)
+                    (lambda (y) ((lambda (z) z)))))
+      '()
+      q))
+  '((a b c)))
+
+(test "Scheme-interpreter-list-2"
+  (run 10 (q)
+    (eval-expo
+     `(letrec ((eval-expr
+                (lambda (expr env)
+                  (match expr
+                    [`(quote ,datum) datum]
+                    [(? symbol? x) (env x)]
+                    [`(lambda (,(? symbol? x)) ,body)
+                     (lambda (a)
+                       (eval-expr body (lambda (y)
+                                         (if (equal? x y)
+                                             a
+                                             (env y)))))]
+                    [`(list) '()]
+                    [`(list ,e . ,e*)
+                     (cons (eval-expr e env)
+                           (eval-expr (cons 'list e*) env))]
+                    [`(,rator ,rand)
+                     ((eval-expr rator env) (eval-expr rand env))]))))
+        (eval-expr ',q
+                   (lambda (y) ((lambda (z) z)))))
+     '()
+     '(I love you)))
+  '('(I love you)
+    (((lambda (_.0) '(I love you)) '_.1) (=/= ((_.0 closure)))
+     (sym _.0) (absento (closure _.1)))
+    (((lambda (_.0) _.0) '(I love you)) (=/= ((_.0 closure)))
+     (sym _.0))
+    (list 'I 'love 'you)
+    (((lambda (_.0) '(I love you)) (lambda (_.1) _.2))
+     (=/= ((_.0 closure)) ((_.1 closure))) (sym _.0 _.1)
+     (absento (closure _.2)))
+    (((lambda (_.0) '(I love you)) (list))
+     (=/= ((_.0 closure))) (sym _.0))
+    ((list ((lambda (_.0) 'I) '_.1) 'love 'you)
+     (=/= ((_.0 closure))) (sym _.0) (absento (closure _.1)))
+    ((list 'I 'love ((lambda (_.0) 'you) '_.1))
+     (=/= ((_.0 closure))) (sym _.0) (absento (closure _.1)))
+    ((list 'I ((lambda (_.0) 'love) '_.1) 'you)
+     (=/= ((_.0 closure))) (sym _.0) (absento (closure _.1)))
+    ((list 'I 'love ((lambda (_.0) _.0) 'you))
+     (=/= ((_.0 closure))) (sym _.0))))
+
+|#
+;; too slow to return
+(test "Scheme-interpreter-list-quine-1"
+  (run 1 (q)
+    (eval-expo
+     `(letrec ((eval-expr
+                (lambda (expr env)
+                  (match expr
+                    [`(quote ,datum) datum]
+                    [(? symbol? x) (env x)]
+                    [`(lambda (,(? symbol? x)) ,body)
+                     (lambda (a)
+                       (eval-expr body (lambda (y)
+                                         (if (equal? x y)
+                                             a
+                                             (env y)))))]
+                    [`(list) '()]
+                    [`(list ,e . ,e*)
+                     (cons (eval-expr e env)
+                           (eval-expr (cons 'list e*) env))]
+                    [`(,rator ,rand)
+                     ((eval-expr rator env) (eval-expr rand env))]))))
+        (eval-expr ',q
+                   (lambda (y) ((lambda (z) z)))))
+     '()
+     q))
+  '???)
+|#
+
 (test "Scheme-interpreter-8"
   (run* (q)
     (eval-expo
