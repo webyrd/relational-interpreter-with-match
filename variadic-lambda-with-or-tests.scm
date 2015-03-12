@@ -144,11 +144,11 @@
      q))
   '(#t))
 
-;; Getting ready to run the proof checker backwards, as a theorem
-;; prover.  To make sure our query has the right syntactic structure,
-;; we unify 'prf' with the answer.  So we are still running the proof
-;; checker "forwards," although we are using logic variables, so this
-;; code doesn't run directly in Racket.
+;; Getting ready to run the proof checker as a theorem prover.  To
+;; make sure our query has the right syntactic structure, we unify
+;; 'prf' with the answer.  So we are still running the proof checker
+;; "forwards," although we are using logic variables, so this code
+;; doesn't run directly in Racket.
 
 ;; 3 collections
 ;; 3478 ms elapsed cpu time, including 0 ms collecting
@@ -196,8 +196,8 @@
       C)))
 
 ;; Another test to ensure we are instantiating 'prf' and 'assms' to
-;; the correct terms before we try running "backwards."  Once again,
-;; this test runs forwards.
+;; the correct terms before we try running the proof checker as a
+;; theorem prover.  Once again, this test runs forwards.
 
 ;; 3 collections
 ;; 3352 ms elapsed cpu time, including 0 ms collecting
@@ -247,10 +247,10 @@
       C)))
 
 ;; The real test!  We are no longer unifying 'prf' with the answer.
-;; The proof checker is running "backwards," inferring the proof tree
-;; for the theorem we are trying to prove.  The proof checker function
-;; is now acting as a relation, which lets us use it as a theorem
-;; prover.
+;; The proof checker is now inferring the proof tree for the theorem
+;; we are trying to prove (C) given a set of assumptions (A, A => B,
+;; and B => C).  The proof checker *function* is now acting as a
+;; *relation*, which lets us use it as a theorem prover.
 
 ;; 10 collections
 ;; 12273 ms elapsed cpu time, including 1 ms collecting
