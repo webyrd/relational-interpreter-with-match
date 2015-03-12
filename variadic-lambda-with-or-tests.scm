@@ -8,6 +8,12 @@
 ;; this proof *checker* can act as a theorem prover, finding a proof
 ;; tree to prove a theorem.
 
+;; The proof checker uses 'and', so we have added both 'and' and 'or'
+;; to the relational interpreter.  We can't just add 'and' as a helper
+;; function, as we do with 'member?', since 'and' uses short-circuit
+;; evaluation.
+
+;; Let's test 'and' and 'or':
 
 ;; and tests
 (test "and-0"
