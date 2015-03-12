@@ -3,8 +3,8 @@
 (load "mk/matche.scm")
 
 ;; We use the relational Scheme interpreter, extended to support 'and'
-;; and 'or', to allow us to write a simple proof checker as a Scheme
-;; function.  Because we can treat the Scheme function as a relation,
+;; and 'or', to allow us to write a simple proof checker as a Racket
+;; function.  Because we can treat the Racket function as a relation,
 ;; this proof *checker* can act as a theorem prover, finding a proof
 ;; tree to prove a theorem.
 
@@ -69,14 +69,33 @@
   '(6))
 
 
-;; port of Matt Might's very simple theorem prover
+;; We now port Matt Might's minimalist proof checker to use the
+;; subset of Racket supported by our relational interpreter.
+;; Matt's proof checker:
+
+#|
+(define (proof? proof)
+  (match proof
+    ((assumption ,assms () ,A) (member? A assms))
+    ((modus-ponens
+      ,assms (,(and ant1 ‘(,_ ,assms1 ,_ (if ,A ,B)))
+              ,(and ant2 ‘(,_ ,assms2 ,_ ,C))) ,D)
+     (and (equal? A C) (equal? B D)
+          (equal? assms assms1) (equal? assms assms2)
+          (proof? ant1)
+          (proof? ant2)))))
+|#
+
+;; Here is our port of the proof checker to our interpreter.  We use
+;; 'letrec' instead of 'define', we define 'member?'  as a helper
+;; function, and use the Racket pattern-matching syntax.  The
+;; resulting 'letrec' expression runs without modification in Racket,
+;; since in this example we are running the proof checker "forward."
 
 ;; 4 collections
 ;; 3980 ms elapsed cpu time, including 0 ms collecting
 ;; 3985 ms elapsed real time, including 0 ms collecting
 ;; 33762080 bytes allocated
-;;
-;; The letrec runs without modification in Racket
 (test "proof-1"
   (run* (q)
     (eval-expo
@@ -108,6 +127,12 @@
      '()
      q))
   '(#t))
+
+;; Getting ready to run the proof checker backwards, as a theorem
+;; prover.  To make sure our query has the right syntactic structure,
+;; we unify 'prf' with the answer.  So we are still running the proof
+;; checker "forward," although we are using logic variables, so this
+;; code doesn't run directly in Racket.
 
 ;; 3 collections
 ;; 3478 ms elapsed cpu time, including 0 ms collecting
