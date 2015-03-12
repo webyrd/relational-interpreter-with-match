@@ -201,6 +201,8 @@
 ;; 12273 ms elapsed cpu time, including 1 ms collecting
 ;; 12283 ms elapsed real time, including 2 ms collecting
 ;; 82533568 bytes allocated
+;;
+;; run 2 seems to diverge
 (test "proof-2c"
   (run 1 (prf)
     (fresh (rule assms ants)
