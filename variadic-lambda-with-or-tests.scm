@@ -504,12 +504,12 @@
 ;; proof trees that just assume the theorem to be proved, lets
 ;; restrict the outer proof rule to be modus ponens.
 ;;
-;; 7 collections
-;; 7563 ms elapsed cpu time, including 1 ms collecting
-;; 7569 ms elapsed real time, including 1 ms collecting
-;; 53604336 bytes allocated
+;; 27 collections
+;; 84672 ms elapsed cpu time, including 7 ms collecting
+;; 84794 ms elapsed real time, including 7 ms collecting
+;; 226336768 bytes allocated
 (test "generate-theorems/proofs-using-modus-ponens"
-  (run 5 (prf)
+  (run 20 (prf)
     (fresh (assms ants conseq)
       (== `(modus-ponens ,assms ,ants ,conseq) prf)
       (eval-expo
@@ -567,7 +567,199 @@
                    _.1)
      (=/= ((_.0 _.2)) ((_.0 _.3)) ((_.0 _.4)))
      (absento (closure _.0) (closure _.1) (closure _.2)
-              (closure _.3) (closure _.4) (closure _.5)))))
+              (closure _.3) (closure _.4) (closure _.5)))
+    ((modus-ponens ((if _.0 _.1) _.2 _.3 _.4 _.5 _.0 . _.6)
+                   ((assumption ((if _.0 _.1) _.2 _.3 _.4 _.5 _.0 . _.6)
+                                () (if _.0 _.1))
+                    (assumption ((if _.0 _.1) _.2 _.3 _.4 _.5 _.0 . _.6)
+                                () _.0))
+                   _.1)
+     (=/= ((_.0 _.2)) ((_.0 _.3)) ((_.0 _.4)) ((_.0 _.5)))
+     (absento (closure _.0) (closure _.1) (closure _.2)
+              (closure _.3) (closure _.4) (closure _.5)
+              (closure _.6)))
+    ((modus-ponens
+      ((if _.0 _.1) _.2 _.3 _.4 _.5 _.6 _.0 . _.7)
+      ((assumption
+        ((if _.0 _.1) _.2 _.3 _.4 _.5 _.6 _.0 . _.7) ()
+        (if _.0 _.1))
+       (assumption
+        ((if _.0 _.1) _.2 _.3 _.4 _.5 _.6 _.0 . _.7) () _.0))
+      _.1)
+     (=/= ((_.0 _.2)) ((_.0 _.3)) ((_.0 _.4)) ((_.0 _.5))
+          ((_.0 _.6)))
+     (absento (closure _.0) (closure _.1) (closure _.2)
+              (closure _.3) (closure _.4) (closure _.5)
+              (closure _.6) (closure _.7)))
+    ((modus-ponens (_.0 (if _.1 _.2) _.1 . _.3)
+                   ((assumption (_.0 (if _.1 _.2) _.1 . _.3) ()
+                                (if _.1 _.2))
+                    (assumption (_.0 (if _.1 _.2) _.1 . _.3) () _.1))
+                   _.2)
+     (=/= ((_.0 _.1)) ((_.0 (if _.1 _.2))))
+     (absento (closure _.0) (closure _.1) (closure _.2)
+              (closure _.3)))
+    ((modus-ponens (_.0 _.1 (if _.0 _.2) . _.3)
+                   ((assumption (_.0 _.1 (if _.0 _.2) . _.3) ()
+                                (if _.0 _.2))
+                    (assumption (_.0 _.1 (if _.0 _.2) . _.3) () _.0))
+                   _.2)
+     (=/= ((_.1 (if _.0 _.2))))
+     (absento (closure _.0) (closure _.1) (closure _.2)
+              (closure _.3)))
+    ((modus-ponens
+      ((if _.0 _.1) _.2 _.3 _.4 _.5 _.6 _.7 _.0 . _.8)
+      ((assumption
+        ((if _.0 _.1) _.2 _.3 _.4 _.5 _.6 _.7 _.0 . _.8) ()
+        (if _.0 _.1))
+       (assumption
+        ((if _.0 _.1) _.2 _.3 _.4 _.5 _.6 _.7 _.0 . _.8) ()
+        _.0))
+      _.1)
+     (=/= ((_.0 _.2)) ((_.0 _.3)) ((_.0 _.4)) ((_.0 _.5))
+          ((_.0 _.6)) ((_.0 _.7)))
+     (absento (closure _.0) (closure _.1) (closure _.2)
+              (closure _.3) (closure _.4) (closure _.5)
+              (closure _.6) (closure _.7) (closure _.8)))
+    ((modus-ponens
+      ((if _.0 _.1) _.2 _.3 _.4 _.5 _.6 _.7 _.8 _.0 . _.9)
+      ((assumption
+        ((if _.0 _.1) _.2 _.3 _.4 _.5 _.6 _.7 _.8 _.0 . _.9)
+        () (if _.0 _.1))
+       (assumption
+        ((if _.0 _.1) _.2 _.3 _.4 _.5 _.6 _.7 _.8 _.0
+         . _.9)
+        () _.0))
+      _.1)
+     (=/= ((_.0 _.2)) ((_.0 _.3)) ((_.0 _.4)) ((_.0 _.5))
+          ((_.0 _.6)) ((_.0 _.7)) ((_.0 _.8)))
+     (absento (closure _.0) (closure _.1) (closure _.2)
+              (closure _.3) (closure _.4) (closure _.5)
+              (closure _.6) (closure _.7) (closure _.8)
+              (closure _.9)))
+    ((modus-ponens (_.0 (if _.1 _.2) _.3 _.1 . _.4)
+                   ((assumption (_.0 (if _.1 _.2) _.3 _.1 . _.4) ()
+                                (if _.1 _.2))
+                    (assumption (_.0 (if _.1 _.2) _.3 _.1 . _.4) () _.1))
+                   _.2)
+     (=/= ((_.0 _.1)) ((_.0 (if _.1 _.2))) ((_.1 _.3)))
+     (absento (closure _.0) (closure _.1) (closure _.2)
+              (closure _.3) (closure _.4)))
+    ((modus-ponens
+      ((if _.0 _.1) _.2 _.3 _.4 _.5 _.6 _.7 _.8 _.9 _.0
+       . _.10)
+      ((assumption
+        ((if _.0 _.1) _.2 _.3 _.4 _.5 _.6 _.7 _.8 _.9 _.0
+         . _.10)
+        () (if _.0 _.1))
+       (assumption
+        ((if _.0 _.1) _.2 _.3 _.4 _.5 _.6 _.7 _.8 _.9 _.0
+         . _.10)
+        () _.0))
+      _.1)
+     (=/= ((_.0 _.2)) ((_.0 _.3)) ((_.0 _.4)) ((_.0 _.5))
+          ((_.0 _.6)) ((_.0 _.7)) ((_.0 _.8)) ((_.0 _.9)))
+     (absento (closure _.0) (closure _.1) (closure _.10)
+              (closure _.2) (closure _.3) (closure _.4)
+              (closure _.5) (closure _.6) (closure _.7)
+              (closure _.8) (closure _.9)))
+    ((modus-ponens
+      ((if _.0 _.1) _.2 _.3 _.4 _.5 _.6 _.7 _.8 _.9 _.10 _.0
+       . _.11)
+      ((assumption
+        ((if _.0 _.1) _.2 _.3 _.4 _.5 _.6 _.7 _.8 _.9 _.10
+         _.0 . _.11)
+        () (if _.0 _.1))
+       (assumption
+        ((if _.0 _.1) _.2 _.3 _.4 _.5 _.6 _.7 _.8 _.9 _.10
+         _.0 . _.11)
+        () _.0))
+      _.1)
+     (=/= ((_.0 _.10)) ((_.0 _.2)) ((_.0 _.3)) ((_.0 _.4))
+          ((_.0 _.5)) ((_.0 _.6)) ((_.0 _.7)) ((_.0 _.8))
+          ((_.0 _.9)))
+     (absento (closure _.0) (closure _.1) (closure _.10)
+              (closure _.11) (closure _.2) (closure _.3)
+              (closure _.4) (closure _.5) (closure _.6)
+              (closure _.7) (closure _.8) (closure _.9)))
+    ((modus-ponens (_.0 (if _.1 _.2) _.3 _.4 _.1 . _.5)
+                   ((assumption (_.0 (if _.1 _.2) _.3 _.4 _.1 . _.5) ()
+                                (if _.1 _.2))
+                    (assumption (_.0 (if _.1 _.2) _.3 _.4 _.1 . _.5) ()
+                                _.1))
+                   _.2)
+     (=/= ((_.0 _.1)) ((_.0 (if _.1 _.2))) ((_.1 _.3))
+          ((_.1 _.4)))
+     (absento (closure _.0) (closure _.1) (closure _.2)
+              (closure _.3) (closure _.4) (closure _.5)))
+    ((modus-ponens (_.0 _.1 (if _.1 _.2) . _.3)
+                   ((assumption (_.0 _.1 (if _.1 _.2) . _.3) ()
+                                (if _.1 _.2))
+                    (assumption (_.0 _.1 (if _.1 _.2) . _.3) () _.1))
+                   _.2)
+     (=/= ((_.0 _.1)) ((_.0 (if _.1 _.2))))
+     (absento (closure _.0) (closure _.1) (closure _.2)
+              (closure _.3)))
+    ((modus-ponens
+      ((if _.0 _.1) _.2 _.3 _.4 _.5 _.6 _.7 _.8 _.9 _.10 _.11
+       _.0 . _.12)
+      ((assumption
+        ((if _.0 _.1) _.2 _.3 _.4 _.5 _.6 _.7 _.8 _.9 _.10
+         _.11 _.0 . _.12)
+        () (if _.0 _.1))
+       (assumption
+        ((if _.0 _.1) _.2 _.3 _.4 _.5 _.6 _.7 _.8 _.9 _.10
+         _.11 _.0 . _.12)
+        () _.0))
+      _.1)
+     (=/= ((_.0 _.10)) ((_.0 _.11)) ((_.0 _.2)) ((_.0 _.3))
+          ((_.0 _.4)) ((_.0 _.5)) ((_.0 _.6)) ((_.0 _.7))
+          ((_.0 _.8)) ((_.0 _.9)))
+     (absento (closure _.0) (closure _.1) (closure _.10)
+              (closure _.11) (closure _.12) (closure _.2)
+              (closure _.3) (closure _.4) (closure _.5)
+              (closure _.6) (closure _.7) (closure _.8)
+              (closure _.9)))
+    ((modus-ponens
+      ((if _.0 _.1) _.2 _.3 _.4 _.5 _.6 _.7 _.8 _.9 _.10 _.11
+       _.12 _.0 . _.13)
+      ((assumption
+        ((if _.0 _.1) _.2 _.3 _.4 _.5 _.6 _.7 _.8 _.9 _.10
+         _.11 _.12 _.0 . _.13)
+        () (if _.0 _.1))
+       (assumption
+        ((if _.0 _.1) _.2 _.3 _.4 _.5 _.6 _.7 _.8 _.9 _.10
+         _.11 _.12 _.0 . _.13)
+        () _.0))
+      _.1)
+     (=/= ((_.0 _.10)) ((_.0 _.11)) ((_.0 _.12)) ((_.0 _.2))
+          ((_.0 _.3)) ((_.0 _.4)) ((_.0 _.5)) ((_.0 _.6))
+          ((_.0 _.7)) ((_.0 _.8)) ((_.0 _.9)))
+     (absento (closure _.0) (closure _.1) (closure _.10)
+              (closure _.11) (closure _.12) (closure _.13)
+              (closure _.2) (closure _.3) (closure _.4)
+              (closure _.5) (closure _.6) (closure _.7)
+              (closure _.8) (closure _.9)))
+    ((modus-ponens (_.0 (if _.1 _.2) _.3 _.4 _.5 _.1 . _.6)
+                   ((assumption (_.0 (if _.1 _.2) _.3 _.4 _.5 _.1 . _.6)
+                                () (if _.1 _.2))
+                    (assumption (_.0 (if _.1 _.2) _.3 _.4 _.5 _.1 . _.6)
+                                () _.1))
+                   _.2)
+     (=/= ((_.0 _.1)) ((_.0 (if _.1 _.2))) ((_.1 _.3))
+          ((_.1 _.4)) ((_.1 _.5)))
+     (absento (closure _.0) (closure _.1) (closure _.2)
+              (closure _.3) (closure _.4) (closure _.5)
+              (closure _.6)))
+    ((modus-ponens ((if _.0 _.0) _.0 . _.1)
+                   ((assumption ((if _.0 _.0) _.0 . _.1) () (if _.0 _.0))
+                    (modus-ponens ((if _.0 _.0) _.0 . _.1)
+                                  ((assumption ((if _.0 _.0) _.0 . _.1) ()
+                                               (if _.0 _.0))
+                                   (assumption ((if _.0 _.0) _.0 . _.1) () _.0))
+                                  _.0))
+                   _.0)
+     (absento (closure _.0) (closure _.1)))))
 
 ;; Here we generate *incorrect* proof trees.  That is, proof trees
 ;; that *do not* prove the theorem from the given set of assumptions.
