@@ -499,6 +499,12 @@
      (absento (closure _.0) (closure _.1) (closure _.2)
               (closure _.3)))))
 
+;; Here we generate *incorrect* proof trees.  That is, proof trees
+;; that *do not* prove the theorem from the given set of assumptions.
+;; We do this simply by changing the last argument of 'eval-expo' to
+;; #f instead of #t.  In other words, we are inferring proofs for
+;; which the 'proof?' function in Racket would return #f.
+
 ;; 15 collections
 ;; 29688 ms elapsed cpu time, including 2 ms collecting
 ;; 29691 ms elapsed real time, including 2 ms collecting
