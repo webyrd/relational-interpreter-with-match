@@ -2,11 +2,15 @@
 (load "mk/test-check.scm")
 (load "mk/matche.scm")
 
-;; We use the relational Scheme interpreter, extended to support 'and'
+;; We use the relational Racket interpreter, extended to support 'and'
 ;; and 'or', to allow us to write a simple proof checker as a Racket
 ;; function.  Because we can treat the Racket function as a relation,
 ;; this proof *checker* can act as a theorem prover, finding a proof
 ;; tree to prove a theorem.
+
+;; The simple proof checker and proof example are from Matt Might.
+
+
 
 ;; The proof checker uses 'and', so we have added both 'and' and 'or'
 ;; to the relational interpreter.  We can't just add 'and' as a helper
@@ -77,6 +81,8 @@
 
 ;; We now port Matt Might's minimalist proof checker to use the
 ;; subset of Racket supported by our relational interpreter.
+;; Our example problem is also from Matt.
+;;
 ;; Matt's proof checker:
 
 #|
@@ -97,6 +103,9 @@
 ;; function, and use the Racket pattern-matching syntax.  The
 ;; resulting 'letrec' expression runs without modification in Racket,
 ;; since in this example we are running the proof checker "forward."
+
+;; We are asking the proof checker to prove C, using the assumptions
+;; A, A => B, and B => C.
 
 ;; 4 collections
 ;; 3980 ms elapsed cpu time, including 0 ms collecting
