@@ -104,8 +104,9 @@
 ;; 'letrec' expression runs without modification in Racket, since the
 ;; expression does not include any logic variables.
 
-;; We are asking the proof checker whether we can derive C, using the
-;; assumptions A, A => B, and B => C.
+;; We are asking the proof checker to check our proof of C, using the
+;; assumptions A, A => B, and B => C.  Note that we give the entire
+;; proof tree as the input to 'proof?'.
 
 ;; 4 collections
 ;; 3980 ms elapsed cpu time, including 0 ms collecting
