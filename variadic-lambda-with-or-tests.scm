@@ -150,12 +150,12 @@
          B))
       C)))
 
-;; 2 collections
-;; 3479 ms elapsed cpu time, including 0 ms collecting
-;; 3481 ms elapsed real time, including 0 ms collecting
-;; 23832976 bytes allocated
+;; 3 collections
+;; 3352 ms elapsed cpu time, including 0 ms collecting
+;; 3356 ms elapsed real time, including 0 ms collecting
+;; 23833552 bytes allocated
 (test "proof-2b"
-  (run 1 (prf)
+  (run* (prf)
     (fresh (rule assms ants)
       (== `(,rule ,assms ,ants C) prf)
       (== `(A (if A B) (if B C)) assms)
