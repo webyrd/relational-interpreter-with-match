@@ -143,7 +143,7 @@
      q))
   '(#t))
 
-;; Getting ready to run the proof checker backwards, as a theorem
+;; Getting ready to run the proof checker backward, as a theorem
 ;; prover.  To make sure our query has the right syntactic structure,
 ;; we unify 'prf' with the answer.  So we are still running the proof
 ;; checker "forward," although we are using logic variables, so this
@@ -195,7 +195,7 @@
       C)))
 
 ;; Another test that we are instantiating 'prf' and 'assms' to the
-;; correct terms before we try running "backwards."  Once again, this
+;; correct terms before we try running "backward."  Once again, this
 ;; test runs forwards.
 
 ;; 3 collections
@@ -246,7 +246,7 @@
       C)))
 
 ;; The real test!  We are no longer unifying 'prf' with the answer.
-;; The proof checker is running "backwards," inferring the proof tree
+;; The proof checker is running "backward," inferring the proof tree
 ;; for the theorem we are trying to prove.  The proof checker function
 ;; is now acting as a relation, which lets us use it as a theorem
 ;; prover.
