@@ -94,6 +94,54 @@
     (((lambda (_.0) _.0) '(I love you)) (=/= ((_.0 closure)))
      (sym _.0))))
 
+;; 30 collections
+;; 6202 ms elapsed cpu time, including 33 ms collecting
+;; 6206 ms elapsed real time, including 33 ms collecting
+;; 252558864 bytes allocated
+(test "Scheme-interpreter-list-cons-love-no-map-1b"
+  ;; list implemented with letrec rather than with map
+  (run 10 (q)
+    (eval-expo
+     `(letrec ((eval-expr
+                (lambda (expr env)
+                  (match expr
+                    [`(quote ,datum) datum]
+                    [(? symbol? x) (env x)]
+                    [`(cons ,e1 ,e2)
+                     (cons (eval-expr e1 env) (eval-expr e2 env))]
+                    [`(list . ,e*)
+                     (letrec ((loop (lambda (e*)
+                                      (if (null? e*)
+                                          '()
+                                          (cons (eval-expr (car e*) env) (loop (cdr e*)))))))
+                       (loop e*))]
+                    [`(lambda (,(? symbol? x)) ,body)
+                     (lambda (a)
+                       (eval-expr body (lambda (y)
+                                         (if (equal? x y)
+                                             a
+                                             (env y)))))]
+                    [`(,rator ,rand)
+                     ((eval-expr rator env) (eval-expr rand env))]))))
+        (eval-expr ',q
+                   (lambda (y) ((lambda (z) z)))))
+     '()
+     '(I love you)))
+  '('(I love you)
+    (cons 'I '(love you))
+    (cons 'I (cons 'love '(you)))
+    (list 'I 'love 'you)
+    (cons 'I (cons 'love (cons 'you '())))
+    (((lambda (_.0) '(I love you)) '_.1) (=/= ((_.0 closure)))
+     (sym _.0) (absento (closure _.1)))
+    ((cons ((lambda (_.0) 'I) '_.1) '(love you))
+     (=/= ((_.0 closure))) (sym _.0) (absento (closure _.1)))
+    (((lambda (_.0) _.0) '(I love you)) (=/= ((_.0 closure)))
+     (sym _.0))
+    (cons 'I (list 'love 'you))
+    ((cons ((lambda (_.0) 'I) '_.1) (cons 'love '(you)))
+     (=/= ((_.0 closure))) (sym _.0) (absento (closure _.1)))))
+
 ;; 441 collections
 ;; 244419 ms elapsed cpu time, including 1782 ms collecting
 ;; 244804 ms elapsed real time, including 1787 ms collecting
