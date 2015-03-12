@@ -99,10 +99,10 @@
 |#
 
 ;; Here is our port of the proof checker to our interpreter.  We use
-;; 'letrec' instead of 'define', we define 'member?'  as a helper
-;; function, and use the Racket pattern-matching syntax.  The
-;; resulting 'letrec' expression runs without modification in Racket,
-;; since in this example we are running the proof checker "forward."
+;; 'letrec' instead of 'define', we define 'member?' as a helper
+;; function, and use Racket's pattern-matching syntax.  The resulting
+;; 'letrec' expression runs without modification in Racket, since in
+;; this example we are running the proof checker "forward."
 
 ;; We are asking the proof checker to prove C, using the assumptions
 ;; A, A => B, and B => C.
