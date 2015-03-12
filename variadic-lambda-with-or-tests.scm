@@ -106,11 +106,11 @@
   '(#t))
 
 ;; 3 collections
-;; 3332 ms elapsed cpu time, including 0 ms collecting
-;; 3336 ms elapsed real time, including 0 ms collecting
-;; 23832224 bytes allocated
+;; 3478 ms elapsed cpu time, including 0 ms collecting
+;; 3480 ms elapsed real time, including 0 ms collecting
+;; 23896992 bytes allocated
 (test "proof-2a"
-  (run 1 (prf)
+  (run* (prf)
     (fresh (rule assms ants)
       (== '(modus-ponens
              (A (if A B) (if B C))
