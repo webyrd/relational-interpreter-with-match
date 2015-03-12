@@ -133,13 +133,13 @@
                               (and (proof? (list r1 assms ants1 (list 'if A B)))
                                    (proof? (list r2 assms ants2 A)))]))))
           (proof? '(modus-ponens
-                    (A (if A B) (if B C))
-                    ((assumption (A (if A B) (if B C)) () (if B C))
-                     (modus-ponens
-                      (A (if A B) (if B C))
-                      ((assumption (A (if A B) (if B C)) () (if A B))
-                       (assumption (A (if A B) (if B C)) () A)) B))
-                    C))))
+                     (A (if A B) (if B C))
+                     ((assumption (A (if A B) (if B C)) () (if B C))
+                      (modus-ponens
+                        (A (if A B) (if B C))
+                        ((assumption (A (if A B) (if B C)) () (if A B))
+                         (assumption (A (if A B) (if B C)) () A)) B))
+                     C))))
      '()
      q))
   '(#t))
@@ -261,7 +261,9 @@
 (test "proof-2c"
   (run 1 (prf)
     (fresh (rule assms ants)
+      ;; We want to prove that C holds...
       (== `(,rule ,assms ,ants C) prf)
+      ;; ...given the assumptions A, A => B, and B => C.
       (== `(A (if A B) (if B C)) assms)
       (eval-expo
        `(letrec ((member? (lambda (x ls)
