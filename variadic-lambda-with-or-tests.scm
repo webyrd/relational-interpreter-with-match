@@ -179,6 +179,10 @@
          B))
       C)))
 
+;; Another test that we are instantiating 'prf' and 'assms' to the
+;; correct terms before we try running "backwards."  Once again, this
+;; test runs forwards.
+
 ;; 3 collections
 ;; 3352 ms elapsed cpu time, including 0 ms collecting
 ;; 3356 ms elapsed real time, including 0 ms collecting
@@ -225,6 +229,12 @@
           (assumption (A (if A B) (if B C)) () A))
          B))
       C)))
+
+;; The real test!  We are no longer unifying 'prf' with the answer.
+;; The proof checker is running "backwards," inferring the proof tree
+;; for the theorem we are trying to prove.  The proof checker function
+;; is now acting as a relation, which lets us use it as a theorem
+;; prover.
 
 ;; 10 collections
 ;; 12273 ms elapsed cpu time, including 1 ms collecting
