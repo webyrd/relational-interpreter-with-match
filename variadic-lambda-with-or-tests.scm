@@ -294,6 +294,17 @@
          B))
       C)))
 
+;; Here we run the proof checker/theorem prover with a fresh logic variable
+;; representing the proof tree.  This allows us to generate valid
+;; proof trees, where each proof tree contains a theorem and the
+;; assumptions used to prove that theorem.
+;;
+;; From the answers it is clear the prover tends to generate "proofs
+;; by assumption", assuming the theorem to be proved.  This isn't
+;; surprising, since such proofs require relatively little
+;; computation.  A couple of the proof trees do use modus ponens,
+;; however.
+;;
 ;; 18 collections
 ;; 45118 ms elapsed cpu time, including 3 ms collecting
 ;; 45137 ms elapsed real time, including 4 ms collecting
