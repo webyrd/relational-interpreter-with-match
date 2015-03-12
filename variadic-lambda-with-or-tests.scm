@@ -70,11 +70,11 @@
 ;; port of Matt Might's very simple theorem prover
 
 ;; 4 collections
-;; 3824 ms elapsed cpu time, including 0 ms collecting
-;; 3826 ms elapsed real time, including 0 ms collecting
-;; 33697312 bytes allocated
+;; 3980 ms elapsed cpu time, including 0 ms collecting
+;; 3985 ms elapsed real time, including 0 ms collecting
+;; 33762080 bytes allocated
 (test "proof-1"
-  (run 1 (q)
+  (run* (q)
     (eval-expo
      `(letrec ((member? (lambda (x ls)
                           (if (null? ls)
