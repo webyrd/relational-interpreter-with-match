@@ -2,9 +2,11 @@
 (load "mk/test-check.scm")
 (load "mk/matche.scm")
 
-
-;; Helper Scheme predicate for testing
-(define member? (lambda (x ls) (not (not (member x ls)))))
+;; We use the relational Scheme interpreter, extended to support 'and'
+;; and 'or', to allow us to write a simple proof checker as a Scheme
+;; function.  Because we can treat the Scheme function as a relation,
+;; this proof *checker* can act as a theorem prover, finding a proof
+;; tree to prove a theorem.
 
 
 ;; and tests
