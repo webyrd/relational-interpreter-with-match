@@ -504,6 +504,57 @@
     ((list ((lambda (_.0) _.0) 'I) 'love 'you)
      (=/= ((_.0 closure))) (sym _.0))))
 
+;; 53 collections
+;; 22232 ms elapsed cpu time, including 51 ms collecting
+;; 22242 ms elapsed real time, including 51 ms collecting
+;; 444486784 bytes allocated
+(test "Scheme-interpreter-list-love-local-map-1"
+  ;; list implemented with map, defined locally
+  (run 10 (q)
+    (eval-expo
+     `(letrec ((map (lambda (f ls)
+                      (if (null? ls)
+                          '()
+                          (cons (f (car ls)) (map f (cdr ls)))))))
+        (letrec ((eval-expr
+                  (lambda (expr env)
+                    (match expr
+                      [`(quote ,datum) datum]
+                      [(? symbol? x) (env x)]
+                      [`(list . ,e*)
+                       (map (lambda (e) (eval-expr e env)) e*)]
+                      [`(lambda (,(? symbol? x)) ,body)
+                       (lambda (a)
+                         (eval-expr body (lambda (y)
+                                           (if (equal? x y)
+                                               a
+                                               (env y)))))]
+                      [`(,rator ,rand)
+                       ((eval-expr rator env) (eval-expr rand env))]))))
+          (eval-expr ',q
+                     (lambda (y) ((lambda (z) z))))))
+     '()
+     '(I love you)))
+  '('(I love you)
+    (list 'I 'love 'you)
+    (((lambda (_.0) '(I love you)) '_.1) (=/= ((_.0 closure)))
+     (sym _.0) (absento (closure _.1)))
+    (((lambda (_.0) _.0) '(I love you)) (=/= ((_.0 closure)))
+     (sym _.0))
+    (((lambda (_.0) '(I love you)) (lambda (_.1) _.2))
+     (=/= ((_.0 closure)) ((_.1 closure))) (sym _.0 _.1)
+     (absento (closure _.2)))
+    (((lambda (_.0) '(I love you)) (list))
+     (=/= ((_.0 closure))) (sym _.0))
+    ((list ((lambda (_.0) 'I) '_.1) 'love 'you)
+     (=/= ((_.0 closure))) (sym _.0) (absento (closure _.1)))
+    ((list 'I 'love ((lambda (_.0) 'you) '_.1))
+     (=/= ((_.0 closure))) (sym _.0) (absento (closure _.1)))
+    ((list 'I ((lambda (_.0) 'love) '_.1) 'you)
+     (=/= ((_.0 closure))) (sym _.0) (absento (closure _.1)))
+    ((list ((lambda (_.0) _.0) 'I) 'love 'you)
+     (=/= ((_.0 closure))) (sym _.0))))
+
 ;; 542 collections
 ;; 376792 ms elapsed cpu time, including 2521 ms collecting
 ;; 377667 ms elapsed real time, including 2530 ms collecting
