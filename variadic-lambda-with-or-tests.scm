@@ -75,6 +75,8 @@
 ;; 3980 ms elapsed cpu time, including 0 ms collecting
 ;; 3985 ms elapsed real time, including 0 ms collecting
 ;; 33762080 bytes allocated
+;;
+;; The letrec runs without modification in Racket
 (test "proof-1"
   (run* (q)
     (eval-expo
