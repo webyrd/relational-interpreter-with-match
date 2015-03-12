@@ -3,10 +3,10 @@
 (load "mk/matche.scm")
 
 ;; We use the relational Racket interpreter, extended to support 'and'
-;; and 'or', to allow us to write a simple proof checker as a Racket
-;; function.  Because we can treat the Racket function as a relation,
-;; this proof *checker* can act as a theorem prover, finding a proof
-;; tree to prove a theorem.
+;; and 'or', to allow us to write a simple proof checker for
+;; propositional logic as a Racket function.  Because we can treat the
+;; Racket function as a relation, this proof *checker* can act as a
+;; theorem prover, finding a proof tree to prove a theorem.
 
 ;; The simple proof checker and proof example are from Matt Might.
 
@@ -79,11 +79,11 @@
   '(6))
 
 
-;; We now port Matt Might's minimalist proof checker to use the
-;; subset of Racket supported by our relational interpreter.
-;; Our example problem is also from Matt.
+;; We now port Matt Might's proof checker to use the subset of Racket
+;; supported by our relational interpreter.  Our example problem is
+;; also from Matt.
 ;;
-;; Matt's proof checker:
+;; Matt's minimalist proof checker for propositional logic:
 
 #|
 (define (proof? proof)
