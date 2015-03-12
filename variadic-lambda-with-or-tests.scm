@@ -499,6 +499,76 @@
      (absento (closure _.0) (closure _.1) (closure _.2)
               (closure _.3)))))
 
+
+;; Since the proof checker/theorem prover tends to generate trivial
+;; proof trees that just assume the theorem to be proved, lets
+;; restrict the outer proof rule to be modus ponens.
+;;
+;; 7 collections
+;; 7563 ms elapsed cpu time, including 1 ms collecting
+;; 7569 ms elapsed real time, including 1 ms collecting
+;; 53604336 bytes allocated
+(test "generate-theorems/proofs-using-modus-ponens"
+  (run 5 (prf)
+    (fresh (assms ants conseq)
+      (== `(modus-ponens ,assms ,ants ,conseq) prf)
+      (eval-expo
+       `(letrec ((member? (lambda (x ls)
+                            (if (null? ls)
+                                #f
+                                (if (equal? (car ls) x)
+                                    #t
+                                    (member? x (cdr ls)))))))
+          (letrec ((proof? (lambda (proof)
+                             (match proof
+                               [`(assumption ,assms () ,A)
+                                (member? A assms)]
+                               [`(modus-ponens
+                                  ,assms
+                                  ((,r1 ,assms ,ants1 (if ,A ,B))
+                                   (,r2 ,assms ,ants2 ,A))
+                                  ,B)
+                                (and (proof? (list r1 assms ants1 (list 'if A B)))
+                                     (proof? (list r2 assms ants2 A)))]))))
+            (proof? ',prf)))
+       '()
+       #t)))
+  '(((modus-ponens ((if _.0 _.1) _.0 . _.2)
+                   ((assumption ((if _.0 _.1) _.0 . _.2) () (if _.0 _.1))
+                    (assumption ((if _.0 _.1) _.0 . _.2) () _.0))
+                   _.1)
+     (absento (closure _.0) (closure _.1) (closure _.2)))
+    ((modus-ponens ((if _.0 _.1) _.2 _.0 . _.3)
+                   ((assumption ((if _.0 _.1) _.2 _.0 . _.3) ()
+                                (if _.0 _.1))
+                    (assumption ((if _.0 _.1) _.2 _.0 . _.3) () _.0))
+                   _.1)
+     (=/= ((_.0 _.2)))
+     (absento (closure _.0) (closure _.1) (closure _.2)
+              (closure _.3)))
+    ((modus-ponens (_.0 (if _.0 _.1) . _.2)
+                   ((assumption (_.0 (if _.0 _.1) . _.2) () (if _.0 _.1))
+                    (assumption (_.0 (if _.0 _.1) . _.2) () _.0))
+                   _.1)
+     (absento (closure _.0) (closure _.1) (closure _.2)))
+    ((modus-ponens ((if _.0 _.1) _.2 _.3 _.0 . _.4)
+                   ((assumption ((if _.0 _.1) _.2 _.3 _.0 . _.4) ()
+                                (if _.0 _.1))
+                    (assumption ((if _.0 _.1) _.2 _.3 _.0 . _.4) () _.0))
+                   _.1)
+     (=/= ((_.0 _.2)) ((_.0 _.3)))
+     (absento (closure _.0) (closure _.1) (closure _.2)
+              (closure _.3) (closure _.4)))
+    ((modus-ponens ((if _.0 _.1) _.2 _.3 _.4 _.0 . _.5)
+                   ((assumption ((if _.0 _.1) _.2 _.3 _.4 _.0 . _.5) ()
+                                (if _.0 _.1))
+                    (assumption ((if _.0 _.1) _.2 _.3 _.4 _.0 . _.5) ()
+                                _.0))
+                   _.1)
+     (=/= ((_.0 _.2)) ((_.0 _.3)) ((_.0 _.4)))
+     (absento (closure _.0) (closure _.1) (closure _.2)
+              (closure _.3) (closure _.4) (closure _.5)))))
+
 ;; Here we generate *incorrect* proof trees.  That is, proof trees
 ;; that *do not* prove the theorem from the given set of assumptions.
 ;; We do this simply by changing the last argument of 'eval-expo' to
